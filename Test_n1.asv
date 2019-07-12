@@ -1,0 +1,153 @@
+%Trivial test case, network crossing at the center
+function res = Test_trivial_network(n,iter_num)
+    p = 3;
+    h = 0.005;
+    alpha = 0.1;
+    theta = 0.03;
+    sigma = 0.05;
+    M = ones(n,1)/n;
+    X = rand(n,2);
+    Y = [0.3 0.7;0.7 0.7;0.5 0.5;0.3 0.3; 0.7 0.3];
+    Adj = zeros(5);
+    Adj(1,3) = 1;
+    Adj(2,3) = 1;
+    Adj(3,4) = 1;
+    Adj(3,5) = 1;
+    Adj = or(Adj, Adj');
+    res = euler_wrap(X, Y, Adj, M, iter_num, p, h, alpha, theta, sigma);
+end
+%Plotting functions
+function color_mat = plot_initial (X, Y, Adj)
+    color_mat = rand(size(X,1),3);
+    for i = 1:size(X,1)
+        plot(X(i,1), X(i,2),'marker','o','markersize', 8,'color',color_mat(i,:));
+    end
+    plot(Y(:,1), Y(:,2), '+');
+    for i = 1:size(Y,1)
+        for j = 1:size(Y,1)
+             if Adj(i,j) ~= 0
+                 plot([Y(i,1) Y(j,1)],[Y(i,2) Y(j,2)])
+             end
+         end
+    end
+end
+
+function plot_final(X, X_record, color_mat)
+    for i = 1:size(X_record, 1)
+        plot(X_record(i,1), X_record(i,2), 'marker','.','color', color_mat(mod(i-1,size(X,1))+1,:));
+    end
+    for i = 1:size(X,1)
+        plot(X(i,1), X(i,2),'marker','*','markersize',8, 'color',color_mat(i,:));
+    end
+end
+
+%Wrapping function for forward Euler Scheme. h = step size, p = kernel
+%dimension
+function X_res = euler_wrap(X, Y, Adj, M, iter_num, p, h, alpha, theta, sigma)
+    M = M';
+    figure();
+    hold on;
+    color_mat = plot_initial(X, Y, Adj);
+    tic
+    X_record = [];
+    for i = 1:iter_num
+        X = euler_iter(X, M, Y, Adj, h, p, theta, alpha,sigma);
+        if mod(i, ceil(iter_num/20)) == 0%We allow at most 20 
+            X_record = [X_record', X']';
+        end
+    end
+    toc
+    X_res = X;
+    plot_final(X, X_record, color_mat);
+end
+
+
+%Function K and gradient of K given parameter sigma
+function y = computeK(x, sigma)
+y = exp(-x*x'/(sigma^2))/sigma;
+end
+
+function y = computeKgrad(x, sigma)
+y = -2* x * computeK(x,sigma)/(sigma^2); 
+end
+
+%Computing the convolving term for a given index k
+function U=nextstep_E2(X, l, k, M, p, h, K_mat,sigma)
+    K_grad_kth = zeros(l, 2);
+    for i = 1:l
+        K_grad_kth(i, :) = computeKgrad(X(k, :)-X(i, :),sigma);
+    end
+    u_component_1 = M * K_grad_kth .* K_mat(k);
+    M_1 = M .* K_mat;
+    u_component_2 = M_1 * K_grad_kth;
+    u = -(p-1)*(u_component_1+u_component_2);
+    U = h * u;
+end
+
+%Floyd-Warshall
+function [dists,next] = floyd1(weight_mat)
+N = length(weight_mat(1,:));
+dists = weight_mat;
+next = repmat(1:N,N,1) - diag(1:N);
+
+for k=1:N
+    for i=1:N
+        for j=1:N
+            if dists(i,k) + dists(k,j) < dists(i,j)
+                dists(i,j) = dists(i,k) + dists(k,j);
+                next(i,j) = next(i,k);
+            end
+        end
+    end
+end
+end
+
+function [D,next] = floyd(weight_mat)
+N = length(weight_mat(1,:));
+D = weight_mat;
+next = repmat(1:N,N,1) - diag(1:N);
+for k=1:N
+	i2k = repmat(D(:,k), 1, N);
+ 	k2j = repmat(D(k,:), N, 1);
+ 	D1 = min(D, i2k+k2j);
+    diff = double(D1-D~=0);
+    same = ones(N) - diff;
+    next_ik = repmat(next(:,k), 1, N);
+    next = next .* same + diff .* next_ik; 
+    D = D1;
+end
+end
+
+%Computing the gradient of D term for a given index k
+function V = nextstep_E1(lx, ly, XY_union, next, k, M, alpha, h)
+    D_grad_kth = zeros(lx, 2);
+    xk = XY_union(ly+k,:);
+    for i = 1:lx
+        next_i = next(ly+k, ly+i);
+        if next_i ~= 0
+            zi = XY_union(next_i, :);
+            D_grad_kth(i, :) = (xk-zi)/norm(xk-zi);
+        end
+    end
+    V = h * -2 * M * D_grad_kth;
+end
+    
+            
+%One iteration of forward Euler Scheme
+function X_new = euler_iter(X, M, Y, Adj, h, p, theta, alpha,sigma)
+    l = size(X,1);
+    X_new = zeros(size(X));
+    K_mat = arrayfun(@(i) computeK(X(ceil(i/l),:)-X(mod(i,l)+1,:), sigma), 1:l*l);
+    K_mat = reshape(K_mat, [l,l]);
+    K_mat = (M * K_mat).^(p-2);
+    ly = size(Y, 1);
+    XY_union = cat(1, Y, X);
+    D_mat = squareform(pdist(XY_union));
+    mask = Adj*(1-alpha);
+    mask(l+ly, l+ly) = 0;
+    D_mat = D_mat - mask .* D_mat;
+    [~, next] = floyd1(D_mat);
+    for i = 1:l
+        X_new(i,:) = X(i,:)+nextstep_E1(l, ly, XY_union, next, i, M, alpha,h)+theta*nextstep_E2(X, l, i, M, p, h, K_mat,sigma);
+    end
+end
