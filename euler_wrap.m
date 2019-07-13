@@ -1,6 +1,6 @@
 %Wrapping function for forward Euler Scheme. h = step size, p = kernel
 %dimension. Returns the positions of particles after iter_num iterations.
-function X_res = euler_wrap(X, Y, Adj, M, iter_num, p, h, alpha, theta, sigma, color_mat)
+function X_res = euler_wrap(X, Y, Adj, M, iter_num, p, h, alpha, theta, sigma, lambda, color_mat)
     M = M';
     figure();
     hold on;
@@ -8,7 +8,8 @@ function X_res = euler_wrap(X, Y, Adj, M, iter_num, p, h, alpha, theta, sigma, c
     tic
     X_record = [];
     for i = 1:iter_num
-        [grad,X] = euler_iter(X, M, Y, Adj, h, p, theta, alpha,sigma);
+        [E,grad,X] = euler_iter(X, M, Y, Adj, h, p, theta, alpha,sigma,lambda);
+        fprintf(['\n iter = %d   E = %.4f'],i,E);
         if mod(i, ceil(iter_num/20)) == 0%We allow at most 20 traces per point to appear on the plot, making it less messy
             X_record = [X_record', X']';
         end
@@ -151,7 +152,7 @@ end
 
 
 %One iteration of forward Euler Scheme
-function [grad,X_new] = euler_iter(X, M, Y, Adj, h, p, theta, alpha,sigma)
+function [E,grad,X_new] = euler_iter(X, M, Y, Adj, h, p, theta, alpha,sigma, lambda)
     l = size(X,1);
     X_new = zeros(size(X));
     K_mat = arrayfun(@(i) computeK(X(ceil(i/l),:)-X(mod(i,l)+1,:), sigma), 1:l*l);
@@ -163,11 +164,12 @@ function [grad,X_new] = euler_iter(X, M, Y, Adj, h, p, theta, alpha,sigma)
     mask = Adj*(1-alpha);
     mask(l+ly, l+ly) = 0;
     D_mat = D_mat - mask .* D_mat;
-    [~, next] = floyd1(D_mat);
+    [dists, next] = floyd1(D_mat);
     for i = 1:l
         X_new(i,:) = X(i,:)+h*(nextstep_E1(l, ly, XY_union, next, i, M, alpha)+theta*nextstep_E2(X, l, i, M, p, K_mat,sigma));
     end
     grad = X_new - X;
+    E = calculateEnergyTotal(Y, Adj, dists(ly+1:l+ly, ly+1:ly+l), K_mat, theta, lambda);
     %grad = grad / norm(grad);
     %step_len = sum(vecnorm(X_new-X))/h;
     %step_len

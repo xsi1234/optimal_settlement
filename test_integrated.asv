@@ -677,12 +677,11 @@ end
 function maximize_subroutine(y0,cut_indices0,net_edges0,vert_indices,vert_neighs,arcs,x,mass,lambda1,alpha,tol,rho0,...
             max_m,max_avg_turn,normalize_data,pause_bool,delta,max_e_leng,outer_iter,inner_iter,n)
     y = y0;
-    net_edges = net_edges0;
     for j = 1:outer_iter
         fprintf('\n outer iter = %d', j);
         theta = 0.5;
         tic
-        [y,x,net_edges,~,~,~,~,~,~,~] = mppntest1(y,cut_indices0,net_edges,vert_indices,vert_neighs,arcs,x,mass,lambda1,alpha,tol,rho0,...
+        [y,x,net_edges,~,~,~,~,~,~,~] = mppntest1(y,cut_indices0,net_edges0,vert_indices,vert_neighs,arcs,x,mass,lambda1,alpha,tol,rho0,...
             max_m,max_avg_turn,normalize_data,pause_bool,delta,max_e_leng);
         toc
         p = 3;

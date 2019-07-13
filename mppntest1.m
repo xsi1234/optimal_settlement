@@ -112,7 +112,7 @@ iter = 0; check_top = 0;
 %plotGraph(x,y,arcs,edges,edge_weights,lambda1,alpha,20,mass,rgb_c,ls);
 energy = calculateEnergy1(y,x,edges,edge_costs);
 %fprintf(['\n iter = %d       E = %8.',num2str(num_d),'E      cont_E = %8.',num2str(num_d),'E'],iter,energy,cont_energy);
-fprintf(['\n iter = %d       E = %8.',num2str(num_d),'E'],iter,energy);
+%fprintf(['\n iter = %d       E = %8.',num2str(num_d),'E'],iter,energy);
 
 while energy_prev-energy>tol*energy || energy_prev<energy || ~check_top || n_add>0
     energy_prev = energy;
@@ -144,10 +144,10 @@ while energy_prev-energy>tol*energy || energy_prev<energy || ~check_top || n_add
         %fprintf('\n %d inner ADMM iterations',inner_iter);
         %fprintf('\n %d inner iters',inner_iter);
     end
-    fprintf(['\n iter = %d       E = %8.',num2str(num_d),'E'],iter,energy0);
+    %fprintf(['\n iter = %d       E = %8.',num2str(num_d),'E'],iter,energy0);
     [y,net_edges] = resolveLongEdges(y,net_edges,max_leng);
     [y,net_edges] = mergeVertices(y,net_edges,delta);
-
+    
     [edges,edge_costs,edge_weights,net_edges,y_net_edge_inds,neighbors,y,z,b,next] = computeEdgeWeights1(y,x,alpha,lambda1,net_edges,mass,check_top);
     energy = calculateEnergy1(y,x,edges,edge_costs);
     %if energy0-energy<tol*10
