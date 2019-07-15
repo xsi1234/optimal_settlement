@@ -49,20 +49,32 @@ function plot_particles(X, X_record, color_mat)
     end
 end
 
-%Function K and gradient of K given parameter sigma
+% function y = computeK(x, sigma)
+% y = exp(-x*x'/(sigma^2))/sigma;
+% end
+% 
+% function y = computeKgrad(x, sigma)
+% y = -2* x * computeK(x,sigma)/(sigma^2); 
+% end
+
 function y = computeK(x, sigma)
-y = exp(-x*x'/(sigma^2))/sigma;
+y = exp(-norm(x)/(sigma^2))/sigma;
+if y < 1e-20
+    y=0;
+end
 end
 
 function y = computeKgrad(x, sigma)
-y = -2* x * computeK(x,sigma)/(sigma^2); 
+y = -(x /norm(x))*computeK(x, sigma)/(sigma^2); 
 end
 
 %Computing the convolving term for a given index k
 function U=nextstep_E2(X, l, k, M, p, K_mat,sigma)
     K_grad_kth = zeros(l, 2);
     for i = 1:l
-        K_grad_kth(i, :) = computeKgrad(X(k, :)-X(i, :),sigma);
+        if i~=k
+            K_grad_kth(i, :) = computeKgrad(X(k, :)-X(i, :),sigma);
+        end
     end
     u_component_1 = M * K_grad_kth .* K_mat(k);
     M_1 = M .* K_mat;

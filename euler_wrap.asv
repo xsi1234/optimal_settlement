@@ -2,7 +2,7 @@
 %dimension. Returns the positions of particles after iter_num iterations.
 function X_res = euler_wrap(X, Y, Adj, M, iter_num, p, h, alpha, theta, sigma, lambda, color_mat)
     figure();
-    h
+    hold on;
     plot_network(Y, Adj);
     tic
     X_record = [];
@@ -49,13 +49,20 @@ function plot_particles(X, X_record, color_mat)
     end
 end
 
-%Function K and gradient of K given parameter sigma
+% function y = computeK(x, sigma)
+% y = exp(-x*x'/(sigma^2))/sigma;
+% end
+% 
+% function y = computeKgrad(x, sigma)
+% y = -2* x * computeK(x,sigma)/(sigma^2); 
+% end
+
 function y = computeK(x, sigma)
-y = exp(-x*x'/(sigma^2))/sigma;
+y = exp(-norm(x)/(sigma^2))/sigma;
 end
 
 function y = computeKgrad(x, sigma)
-y = -2* x * computeK(x,sigma)/(sigma^2); 
+y = -x/n(sigma^2); 
 end
 
 %Computing the convolving term for a given index k
