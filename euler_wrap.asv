@@ -2,7 +2,7 @@
 %dimension. Returns the positions of particles after iter_num iterations.
 function X_res = euler_wrap(X, Y, Adj, M, iter_num, p, h, alpha, theta, sigma, lambda, color_mat)
     figure();
-    hold on;
+    h
     plot_network(Y, Adj);
     tic
     X_record = [];
