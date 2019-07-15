@@ -532,7 +532,7 @@ function Optimize_network9(outer_iter, inner_iter)
     pause_bool = 0;
     delta = 0;
     max_e_leng = 2;
-    theta = 0.5;
+    theta = 0.2;
     alpha_2 = 0.2;
     sigma = 0.05;
     maximize_subroutine(y0,cut_indices0,net_edges0,vert_indices,vert_neighs,arcs,x,mass,lambda1,alpha,tol,rho0,...

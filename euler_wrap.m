@@ -49,24 +49,24 @@ function plot_particles(X, X_record, color_mat)
     end
 end
 
-% function y = computeK(x, sigma)
-% y = exp(-x*x'/(sigma^2))/sigma;
-% end
-% 
-% function y = computeKgrad(x, sigma)
-% y = -2* x * computeK(x,sigma)/(sigma^2); 
-% end
-
 function y = computeK(x, sigma)
-y = exp(-norm(x)/(sigma^2))/sigma;
-if y < 1e-20
-    y=0;
-end
+y = exp(-x*x'/(sigma^2))/sigma;
 end
 
 function y = computeKgrad(x, sigma)
-y = -(x /norm(x))*computeK(x, sigma)/(sigma^2); 
+y = -2* x * computeK(x,sigma)/(sigma^2); 
 end
+
+% function y = computeK(x, sigma)
+% y = exp(-norm(x)/(sigma^2))/sigma;
+% if y < 1e-20
+%     y=0;
+% end
+% end
+% 
+% function y = computeKgrad(x, sigma)
+% y = -(x /norm(x))*computeK(x, sigma)/(sigma^2); 
+% end
 
 %Computing the convolving term for a given index k
 function U=nextstep_E2(X, l, k, M, p, K_mat,sigma)
@@ -180,7 +180,7 @@ function [E,grad,X_new] = euler_iter(X, M, Y, Adj, h, p, theta, alpha,sigma, lam
         X_new(i,:) = X(i,:)+h*(nextstep_E1(l, ly, XY_union, next, i, M, alpha)+theta*nextstep_E2(X, l, i, M, p, K_mat,sigma));
     end
     grad = X_new - X;
-    E = calculateEnergyTotal(Y, Adj, dists(ly+1:l+ly, ly+1:ly+l), K_mat, theta, lambda);
+    E = calculateEnergyTotal(Y, Adj, dists(ly+1:l+ly, ly+1:ly+l), K_mat, theta, lambda, p, M);
     %grad = grad / norm(grad);
     %step_len = sum(vecnorm(X_new-X))/h;
     %step_len
