@@ -8,7 +8,7 @@ function X_res = euler_wrap(X, Y, Adj, M, iter_num, p, h, alpha, theta, sigma, l
     X_record = [];
     for i = 1:iter_num
         [E,grad,X] = euler_iter(X, M, Y, Adj, h, p, theta, alpha,sigma,lambda);
-        fprintf(['\n iter = %d   E = %.4f'],i,E);
+        fprintf(['\n iter = %d   E = %.8f'],i,E);
         if mod(i, ceil(iter_num/20)) == 0%We allow at most 20 traces per point to appear on the plot, making it less messy
             X_record = [X_record', X']';
         end
@@ -168,7 +168,7 @@ function [E,grad,X_new] = euler_iter(X, M, Y, Adj, h, p, theta, alpha,sigma, lam
     X_new = zeros(size(X));
     K_mat = arrayfun(@(i) computeK(X(ceil(i/l),:)-X(mod(i,l)+1,:), sigma), 1:l*l);
     K_mat = reshape(K_mat, [l,l]);
-    K_mat = (M * K_mat).^(p-2);
+    K_mat_1 = (M * K_mat).^(p-2);
     ly = size(Y, 1);
     XY_union = cat(1, Y, X);
     D_mat = squareform(pdist(XY_union));
@@ -177,7 +177,7 @@ function [E,grad,X_new] = euler_iter(X, M, Y, Adj, h, p, theta, alpha,sigma, lam
     D_mat = D_mat - mask .* D_mat;
     [dists, next] = floyd1(D_mat);
     for i = 1:l
-        X_new(i,:) = X(i,:)+h*(nextstep_E1(l, ly, XY_union, next, i, M, alpha)+theta*nextstep_E2(X, l, i, M, p, K_mat,sigma));
+        X_new(i,:) = X(i,:)+h*(nextstep_E1(l, ly, XY_union, next, i, M, alpha)+theta*nextstep_E2(X, l, i, M, p, K_mat_1,sigma));
     end
     grad = X_new - X;
     E = calculateEnergyTotal(Y, Adj, dists(ly+1:l+ly, ly+1:ly+l), K_mat, theta, lambda, p, M);

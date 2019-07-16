@@ -236,12 +236,12 @@ for i=1:k2
     y_net_edge_inds = [y_net_edge_inds;{[num_net_e-1,num_net_e]}];
     m = m + 1;
     hold on;
-    scatter(new_point(:,1), new_point(:,2),100,'red', 'fill');
+    %scatter(new_point(:,1), new_point(:,2),100,'red', 'fill');
 end
     
 
 if d==2
-    scatter(y_new(removals,1),y_new(removals,2),100,'black','fill');
+    %scatter(y_new(removals,1),y_new(removals,2),100,'black','fill');
     % else if d==3
     %         scatter3(y(removals,1),y(removals,2),y(removals,3),'black','fill');
     %     end

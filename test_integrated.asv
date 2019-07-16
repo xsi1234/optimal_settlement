@@ -474,7 +474,7 @@ end
 
 function Optimize_network9(outer_iter, inner_iter)
     del_r = .1;
-    n_r = 9;
+    n_r = 8;
     x = [0,0];
     for i=1:n_r
         r_i = i*del_r;
@@ -516,7 +516,7 @@ function Optimize_network9(outer_iter, inner_iter)
     vert_neighs = [];
     arcs = [];
     alpha_2 = 0.2;
-    theta = 0.5;
+    theta = 0.1;
     sigma = 0.05;    
     lambda1 = .05;
     rho0 = .5;
@@ -832,28 +832,6 @@ end
 
     
 function maximize_subroutine(y0,cut_indices0,net_edges0,vert_indices,vert_neighs,arcs,x,mass,lambda1,alpha,tol,rho0,...
-            max_m,max_avg_turn,normalize_data,pause_bool,delta,max_e_leng,outer_iter,inner_iter, theta, alpha_2, sigma,n)
-    color_mat = rand(n,3);
-    for j = 1:outer_iter
-        fprintf('\n outer iter = %d', j);
-        tic
-        if isempty(net_edges0)                                                         % SK
-            net_edges0 = getNetEdges(vert_indices,vert_neighs,arcs,length(y0(:,1)));   %
-        end                                                                            %
-        [y,net_edges,~,~,~,~,~,~] = onut(y,net_edges0,x,mass,lambda1,alpha,...        
-            tol,rho0,max_m,max_avg_turn,normalize_data,pause_bool,delta,max_e_leng);   % SK
-        toc
-        p = 3;
-        h = 0.005;
-        Adj = zeros(size(y,1));
-        for i = 1:size(net_edges, 1)
-            Adj(net_edges(i,1), net_edges(i,2)) = 1;
-        end
-        Adj = or(Adj, Adj');
-        x = euler_wrap(x, y, Adj, mass, inner_iter, p, h, alpha_2, theta, sigma, lambda1, color_mat);
-    end
-end
-function maximize_subroutine(y0,cut_indices0,net_edges0,vert_indices,vert_neighs,arcs,x,mass,lambda1,alpha,tol,rho0,...
             max_m,max_avg_turn,normalize_data,pause_bool,delta,max_e_leng,outer_iter,inner_iter,theta, alpha_2, sigma,n)
     y = y0;
     net_edges = net_edges0;
@@ -864,9 +842,8 @@ function maximize_subroutine(y0,cut_indices0,net_edges0,vert_indices,vert_neighs
         if isempty(net_edges0)                                                         % SK
             net_edges0 = getNetEdges(vert_indices,vert_neighs,arcs,length(y0(:,1)));   %
         end                                                                            %
-        [y,net_edges,~,~,~,~,~,~] = onut(y,net_edges0,x,mass,lambda1,alpha,...        
+        [y,net_edges,~,~,~,~,~,~] = onut(y,net_edges,x,mass,lambda1,alpha,...        
             tol,rho0,max_m,max_avg_turn,normalize_data,pause_bool,delta,max_e_leng);   % SK
-        toc
         toc
         p = 3;
         h = 0.005;

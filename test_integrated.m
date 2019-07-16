@@ -474,7 +474,7 @@ end
 
 function Optimize_network9(outer_iter, inner_iter)
     del_r = .1;
-    n_r = 9;
+    n_r = 5;
     x = [0,0];
     for i=1:n_r
         r_i = i*del_r;
@@ -516,7 +516,7 @@ function Optimize_network9(outer_iter, inner_iter)
     vert_neighs = [];
     arcs = [];
     alpha_2 = 0.2;
-    theta = 0.1;
+    theta = 0.5;
     sigma = 0.05;    
     lambda1 = .05;
     rho0 = .5;
@@ -596,7 +596,7 @@ end
 
 function Optimize_network93(outer_iter, inner_iter)
     del_r = .1;
-    n_r = 8;
+    n_r = 9;
     x = [0,0];
     for i=1:n_r
         r_i = i*del_r;
@@ -604,7 +604,7 @@ function Optimize_network93(outer_iter, inner_iter)
         thetas = (2*pi/n_ri:2*pi/n_ri:2*pi)'-(pi/n_ri);
         x = [x;r_i*cos(thetas),r_i*sin(thetas)];
     end
-    x=0.4*x;
+    %x=0.4*x;
     n = length(x(:,1))
     total_mass=0.6;
     mass = (total_mass/n)*ones(1,n);
@@ -844,7 +844,6 @@ function maximize_subroutine(y0,cut_indices0,net_edges0,vert_indices,vert_neighs
         end                                                                            %
         [y,net_edges,~,~,~,~,~,~] = onut(y,net_edges,x,mass,lambda1,alpha,...        
             tol,rho0,max_m,max_avg_turn,normalize_data,pause_bool,delta,max_e_leng);   % SK
-        toc
         toc
         p = 3;
         h = 0.005;
