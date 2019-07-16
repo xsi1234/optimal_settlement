@@ -51,7 +51,6 @@ function [y,net_edges,edges,edge_weights,iter,energy,dists,next] = onut(y0,net_e
 FIX_ENDPTS = 0;
 MAX_INNER_ITER = 100;
 r = 4; %param for modifySpacing
-m = length(y0(:,1));
 n = length(x(:,1));
 
 if isempty(max_m)
@@ -61,6 +60,7 @@ if normalize_data
     x_mean = mass*x;
     x_var = mass*sum((x-repmat(x_mean,n,1)).^2,2);
     x = (x-repmat(x_mean,n,1))/sqrt(x_var);
+    m = length(y0(:,1));
     y0 = (y0 - repmat(x_mean,m,1))/sqrt(x_var);
 end
 
@@ -83,26 +83,24 @@ iter = 0; check_top = 0; e_heur = 0; more_prec = 0; n_add = 1;
 energy = calculateEnergy(y,x,edges,edge_costs);
 %fig2 = figure;
 %plotGraph(x,y,edges,edge_weights,lambda,alpha,20,mass,rgb_c,ls);
-energy0 = energy; %will be energy after ADMM
+%energy0 = energy; %will be energy after ADMM
 %fprintf(['\n iter = %d       E = %8.',num2str(num_d),'E'],iter,energy);
 
 while energy_prev-energy>tol*energy || energy0-energy>tol*energy || energy0<energy || energy_prev<energy || ~check_top || top_change || n_add>0
     energy_prev = energy;
     iter = iter + 1;
-    if iter==20
-    end
     inner_iter = 0;
     energy0 = inf; 
     fi = 1;
     y_new = y; z_new = z; b_new = b;
-    while (energy0>energy_prev || (more_prec && (energy0-energy_prev>tol*energy0)))...
-            && inner_iter<MAX_INNER_ITER %inner_iter<10
-        z_old = z;
-        [y_new,z,b] = updateyzb(y_new,z_new,b_new,x,rho,edges,edge_costs,fi,FIX_ENDPTS);
+    while (energy0>energy_prev || (more_prec && (energy0-energy_prev>tol*energy0)) || inner_iter<10)...
+            && inner_iter<MAX_INNER_ITER 
+        z_prev = z_new;
+        [y_new,z_new,b_new] = updateyzb(y_new,z_new,b_new,x,rho,edges,edge_costs,fi,FIX_ENDPTS);
         fi = 0;
         energy0 = calculateEnergy(y_new,x,edges,edge_costs);
         %figure(fig1); plotNet(x,y,net_edges,rgb_c,ls); drawnow;
-%        figure(fig2); plotGraph(x,y_new,edges,edge_weights,lambda,alpha,20,mass,rgb_c,ls); drawnow;
+        %figure(fig2); plotGraph(x,y_new,edges,edge_weights,lambda,alpha,20,mass,rgb_c,ls); drawnow;
         inner_iter = inner_iter + 1;
 %         if energy0>energy_prev && inner_iter>10
 %             y_new = y; z_new = z; b_new = b;
@@ -118,11 +116,13 @@ while energy_prev-energy>tol*energy || energy0-energy>tol*energy || energy0<ener
     if inner_iter>1
         %fprintf('\n %d inner ADMM iterations',inner_iter);
         %fprintf('\n %d inner iters',inner_iter);
-        if ~isempty(z) && length(z_old(:,1))==length(z(:,1))
-            [r_pri,r_dual] = computeResiduals(x,y,edges,z,z_old,rho);
+        if ~isempty(z) && length(z_prev(:,1))==length(z(:,1))
+            [r_pri,r_dual] = computeResiduals(x,y,edges,z,z_prev,rho);
             if r_pri>5*r_dual, rho = rho*1.3;
+                %if ~isempty(rho0), fprintf('    rho = %3.2E',rho); end
             end
             if 5*r_pri<r_dual, rho = rho/2;
+                %if ~isempty(rho0), fprintf('    rho = %3.2E',rho); end
             end
         end
     end

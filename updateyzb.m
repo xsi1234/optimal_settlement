@@ -53,13 +53,13 @@ else
         b = zeros(size(z0));
     end
 end
-if isempty(z)
-    prez = z0+b;
-    normsprez = sqrt(sum(prez.^2,2)); % computes the euclidean norm of each row vector
-    normsprez(normsprez==0)=1;
-    normalprez = bsxfun(@rdivide,prez, normsprez);
-    z = bsxfun(@times,normalprez, max(normsprez-edge_costs/rho,0));
-end
+
+prez = z0+b;
+normsprez = sqrt(sum(prez.^2,2)); % computes the euclidean norm of each row vector
+normsprez(normsprez==0)=1;
+normalprez = bsxfun(@rdivide,prez, normsprez);
+z = bsxfun(@times,normalprez, max(normsprez-edge_costs/rho,0));
+
 b = b + z0 - z;
 
 z_new = z; b_new = b;

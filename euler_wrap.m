@@ -45,7 +45,7 @@ function plot_particles(X, X_record, color_mat)
 %         plot(X_record(i,1), X_record(i,2), 'marker','.','color', color_mat(mod(i-1,size(X,1))+1,:));
 %     end
     for i = 1:size(X,1)
-        plot(X(i,1), X(i,2),'marker','o','markersize',8, 'color',color_mat(i,:));
+        plot(X(i,1), X(i,2),'marker','o','markersize',5, 'color',color_mat(i,:));
     end
 end
 

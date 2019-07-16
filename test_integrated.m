@@ -527,7 +527,7 @@ function Optimize_network9(outer_iter, inner_iter)
     normalize_data = 0;
     pause_bool = 0;
     delta = 0;
-    max_e_leng = 2;
+    max_e_leng = 0.08;
     maximize_subroutine(y0,cut_indices0,net_edges0,vert_indices,vert_neighs,arcs,x,mass,lambda1,alpha,tol,rho0,...
         max_m,max_avg_turn,normalize_data,pause_bool,delta,max_e_leng,outer_iter,inner_iter, theta, alpha_2, sigma, n);;
 end
@@ -878,7 +878,7 @@ function plot_particles(X, color_mat)
 %         plot(X_record(i,1), X_record(i,2), 'marker','.','color', color_mat(mod(i-1,size(X,1))+1,:));
 %     end
     for i = 1:size(X,1)
-        plot(X(i,1), X(i,2),'marker','o','markersize',8, 'color',color_mat(i,:));
+        plot(X(i,1), X(i,2),'marker','o','markersize',5, 'color',color_mat(i,:));
     end
 end
 

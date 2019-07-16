@@ -136,16 +136,21 @@ if check_top && e_heur
     end
 end
 
-pos_edges = edges(edge_weights>0,:);
-removals = setdiff(1:m,union(pos_edges(:,1),pos_edges(:,2))); %remove points that have no mass going through them
+% pos_edges = edges(edge_weights>0,:);
+% removals = setdiff(1:m,union(pos_edges(:,1),pos_edges(:,2))); %remove points that have no mass going through them
+% for i=1:length(removals)
+%     rem_bool = edges(:,1) == removals(end-i+1) | edges(:,2) == removals(end-i+1);
+%     edges(rem_bool,:) = [];
+%     edge_costs(rem_bool,:) = [];
+%     edge_weights(rem_bool,:) = [];
+%     rem_bool = net_edges(:,1) == removals(end-i+1) | net_edges(:,2) == removals(end-i+1);
+%     net_edges(rem_bool,:) = [];
+%     %make the above lines more efficient?
+%     edges = edges - double(edges>removals(end-i+1));
+%     net_edges = net_edges - double(net_edges>removals(end-i+1));
+% end
+removals = setdiff(1:m,union(edges(:,1),edges(:,2))); %remove points that are not used
 for i=1:length(removals)
-    rem_bool = edges(:,1) == removals(end-i+1) | edges(:,2) == removals(end-i+1);
-    edges(rem_bool,:) = [];
-    edge_costs(rem_bool,:) = [];
-    edge_weights(rem_bool,:) = [];
-    rem_bool = net_edges(:,1) == removals(end-i+1) | net_edges(:,2) == removals(end-i+1);
-    net_edges(rem_bool,:) = [];
-    %make the above lines more efficient?
     edges = edges - double(edges>removals(end-i+1));
     net_edges = net_edges - double(net_edges>removals(end-i+1));
 end
