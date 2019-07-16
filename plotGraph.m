@@ -1,4 +1,4 @@
-function [ ] = plotGraph( x,y,arcs,edges,weights,lambda,alpha,num,mass,rgb_c,ls)
+function [ ] = plotGraph( x,y,edges,weights,lambda,alpha,num,mass,rgb_c,ls)
 %UNTITLED6 Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -23,7 +23,7 @@ if max_w == min_w
 else
     for i=1:k
         ind = edges(sort_ind(i),:);
-        plot(v(ind,1),v(ind,2),'Color',[(max_w-weights(sort_ind(i)))/(max_w-min_w),0,0],'LineWidth',1+weights(sort_ind(i))*4/max_w,'LineStyle',ls);
+        plot(v(ind,1),v(ind,2),'Color',[(max_w-weights(sort_ind(i)))/(max_w-min_w),0,0],'LineWidth',1.5+weights(sort_ind(i))*3/max_w,'LineStyle',ls);
         %plot(v(ind,1),v(ind,2),'Color',cmap(max(1,round((weights(sort_ind(i))-min_w)/(max_w-min_w)*clen)),:),'LineWidth',weights(sort_ind(i))*50,'LineStyle',ls);
     end
 end

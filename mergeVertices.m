@@ -17,7 +17,7 @@ if ~isempty(I_temp)
     end
     hold on;
     for i=1:length(I)
-        %scatter(y(I(i),1),y(I(i),2),100,'black','fill');
+        scatter(y(I(i),1),y(I(i),2),100,'black','fill');
         %edges_indices = net_edges(:,1) == I(i) | net_edges(:,2) == I(i);
         %new_edges = net_edges(edges_indices,:);
         net_edges(net_edges(:,1)==I(i),1) = J(i);

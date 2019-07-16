@@ -30,15 +30,13 @@ function res = Test_trivial_network(iter_num)
     alpha = 0.1;
     theta = 0.03;
     sigma = 0.05;
-    lambda = .02;
-    color_mat = rand(n,3);
     X = [0.35 0.55; 0.65 0.55];
-    M = ones(1,n)/n;
+    M = ones(n,1)/n;
     Y = [0.3 0.5; 0.7 0.5];
     Adj = zeros(2);
     Adj(1,2) = 1;
     Adj = or(Adj, Adj');
-    res = euler_wrap(X, Y, Adj, M, iter_num, p, h, alpha, theta, sigma, lambda, color_mat);
+    res = euler_wrap(X, Y, Adj, M, iter_num, p, h, alpha, theta, sigma);
 end
 
 function res = Test_trivial_network1(n,iter_num)
@@ -47,9 +45,7 @@ function res = Test_trivial_network1(n,iter_num)
     alpha = 0.1;
     theta = 0.03;
     sigma = 0.05;
-    lambda = 0.02;
-    color_mat = rand(n,3);
-    M = ones(1,n)/n;
+    M = ones(n,1)/n;
     X = rand(n,2);
     Y = [0.3 0.7;0.7 0.7;0.5 0.5;0.3 0.3; 0.7 0.3];
     Adj = zeros(5);
@@ -58,7 +54,7 @@ function res = Test_trivial_network1(n,iter_num)
     Adj(3,4) = 1;
     Adj(3,5) = 1;
     Adj = or(Adj, Adj');
-    res = euler_wrap(X, Y, Adj, M, iter_num, p, h, alpha, theta, sigma, lambda, color_mat);
+    res = euler_wrap(X, Y, Adj, M, iter_num, p, h, alpha, theta, sigma);
 end
 
 
@@ -68,9 +64,7 @@ function res = Test_trivial_network2(n,iter_num)
     alpha = 0.1;
     theta = 0.03;
     sigma = 0.05;
-    lambda = .02;
-    color_mat = rand(n,3);
-    M = ones(1,n)/n;
+    M = ones(n,1)/n;
     X = rand(n,2);
     Y = [0.5 0.7;0.3268 0.6;0.3268 0.4;0.5 0.3; 0.6732 0.4;0.6732 0.6; 0.5 0.5];
     Adj = zeros(size(Y));
@@ -84,7 +78,7 @@ function res = Test_trivial_network2(n,iter_num)
     Adj(3,7) = 1;
     Adj(5,7) = 1;
     Adj = or(Adj, Adj');
-    res = euler_wrap(X, Y, Adj, M, iter_num, p, h, alpha, theta, sigma, lambda, color_mat);
+    res = euler_wrap(X, Y, Adj, M, iter_num, p, h, alpha, theta, sigma);
 end
 
 function res = Test_trivial_network3(n,iter_num)
@@ -93,9 +87,7 @@ function res = Test_trivial_network3(n,iter_num)
     alpha = 0.2;
     theta = 0.002;
     sigma = 0.05;
-    lambda = .02;
-    color_mat = rand(n,3);
-    M = ones(1,n)/n;
+    M = ones(n,1)/n;
     X = rand(n,2);
     Y = 5:13;
     Y = [Y', ones(9,1)*10]/20; 
@@ -109,5 +101,5 @@ function res = Test_trivial_network3(n,iter_num)
     Adj(7,8) = 1;
     Adj(8,9) = 1;
     Adj = or(Adj, Adj');
-    res = euler_wrap(X, Y, Adj, M, iter_num, p, h, alpha, theta, sigma, lambda, color_mat);
+    res = euler_wrap(X, Y, Adj, M, iter_num, p, h, alpha, theta, sigma);
 end

@@ -1,6 +1,61 @@
-function [edges,edge_costs,edge_weights,net_edges,y_net_edge_inds,neighbors,y,z,b] = computeEdgeWeights(y,x,alpha,lambda,net_edges,mass,check_top)
-% future optimizations:
-% save n^2 ops on saving cost matrix for data
+function [edges,edge_costs,edge_weights,net_edges,y_net_edge_inds,neighbors,y,z,b,next,top_change,dists] = computeEdgeWeights(y,x,alpha,lambda,net_edges,mass,...
+    check_top,e_heur,delta)
+%COMPUTEEDGEWEIGHTS computes edge weights/masses given network
+%   This function computes geodesics corresponding to the weighted graph
+%   XuY (where the weights correspond to distances, which are multiplied by
+%   alpha if the edge lies in the network). 
+%OUTPUTS:
+% edges - a list of edges on the graph (XuY), whose vertices consist of all
+%   data points 'x', and all network points 'y'. This is not the list of
+%   the complete edge set, just those edges with positive edge_cost
+% edge_costs - a list of costs corresponding to 'edges' (of the graph
+%   XuY). These are the energy contributions 'M_{a,b}' defined in the
+%   paper: the total energy is \sum |a-b| M_{a,b}.
+% edge_weights - a list of weights corresponding to 'edges' (of the graph
+%   XuY). This vector contains the total mass traveling through each edge,
+%   'm_{a,b}' as defined in the paper.
+% net_edges - a list of edges for the initial network. Each edge contains
+%   the indices of the points in y0 that form the edge. It is given as a
+%   n_e x 2 vector, where n_e is the number of edges
+% y_net_edge_inds - a cell that indicates the network edge indices 
+%   corresponding to each vertex on y. y_net_edge_inds{i} is a vector of 
+%   indices corresponding to the edge number (row) where i appears in 
+%   'net_edges'.
+% neighbors - a cell that indicates the neighbors of each vertex on the
+%   network y. neighbors{i} is a vector of indices which share an edge with
+%   vertex i.
+% y - locations of points on final network, given as mxd vector
+%   (m-number of points, d-dimension). It may change in this function since
+%   unnecessary points will be removed.
+% z - dual variable of 'y' for ADMM, currently returned as empty.
+% b - variable for ADMM, currently returned as empty.
+% next - an (m+n)x(m+n) matrix of indices indicating the shortest paths
+%   between all pairs of vertices on the graph XuY. the entry at next(i,j)
+%   gives the point that should be visited next if going from point i to
+%   point j. 
+% top_change - value 1 if the topology if the network has, 0 otherwise
+% dists - the geodesic (shortest path) distances between all m+n vertices 
+%   on the complete graph XuY, with weights equal to length of the edge,
+%   times alpha if the edge belongs to the network.
+%INPUTS:
+% y - locations of points on final network, given as mxd vector
+%   (m-number of points, d-dimension)
+% net_edges - a list of edges for the initial network. Each edge contains
+%   the indices of the points in y0 that form the edge. It is given as a
+%   n_e x 2 vector, where n_e is the number of edges
+% x - the n data points, given as nxd vector
+% mass - the data masses, given as 1xn vector
+% lambda - parameter in ONST functional (value > 0)
+% alpha - cost of travelling along network, value between 0 and 1.
+% check_top - a value equal to 1 if checking to change the topology, 0 
+%   otherwise.
+% e_heur - a value equal to 1 if checking to change the topology via the
+%   heuristic for adding edges (based on ratio of extrinsic to intrinsic 
+%   distance), 0 otherwise. To have an effect, check_top should be 1. If
+%   check_top = 1 and e_heur = 0, then topology may be changed by simple
+%   criteria on how m_{a,b} relates to lambda/(1-alpha).
+% delta - the longest distance of potential edges to be added using
+%   heurisitc.
 
 %[N,~] = size(cost_mat); % number of points on graph
 n = length(mass); %number of data points
@@ -9,62 +64,117 @@ n = length(mass); %number of data points
 N = n+m;
 
 % Compute (m+n)x(m+n) cost matrix
-dist_mat = squareform(pdist([y;x])); %note that points on y are listed first
-net_inds1 = sub2ind(size(dist_mat),net_edges(:,1),net_edges(:,2));
-net_inds2 = sub2ind(size(dist_mat),net_edges(:,2),net_edges(:,1));
+eucdist_mat = squareform(pdist([y;x])); %note that points on y are listed first
+net_inds1 = sub2ind(size(eucdist_mat),net_edges(:,1),net_edges(:,2));
+net_inds2 = sub2ind(size(eucdist_mat),net_edges(:,2),net_edges(:,1));
 net_inds = [net_inds1;net_inds2];
-dist_mat(net_inds) = alpha*dist_mat(net_inds);
-%dist_mat(net_edges(:,1),net_edges(:,2)) = alpha*dist_mat(net_edges(:,1),net_edges(:,2));
-%dist_mat(net_edges(:,2),net_edges(:,1)) = alpha*dist_mat(net_edges(:,2),net_edges(:,1));
+dist_mat = eucdist_mat;
+dist_mat(net_inds) = alpha*eucdist_mat(net_inds);
 % Compute all pairs shortest paths for points on network
-[dists,next] = floyd(m,dist_mat);
-% Compute all pairs shortest paths
-% dists = zeros(N,N);
-% next = zeros(N,N);
-% dists(1:m,1:m) = y_dists;
-% next(1:m,1:m) = y_next;
-% for i=1:m
-%     for j=1:n
-%         j_dist_to_net = sqrt(sum((repmat(x(j,:),m,1)-y).^2,2));
-%         i_intern_dist = sqrt(sum((repmat(y(i,:),m,1)-y).^2,2));
-%         tot_dist = j_dist_to_net + i_intern_dist;
-%         [min_dist,min_ind] = min(tot_dist);
-%         straight_dist = sqrt(sum((y(i,:)-x(j,:)).^2,2));
-%         if min_dist<straight_dist
-%             dists(i,m+j) = min_dist;
-%             dists(m+j,i) = min_dist;
-%             next(i,m+j) = min_ind;
-%             next(m+j,i) = min_ind;
-%         else
-%             dists(i,m+j) = straight_dist;
-%             dists(m+j,i) = sraight_dist;
-%             next(i,m+j) = m+j;
-%             next(m+j,i) = i;
-%         end
-%     end
-% end
-%
-% for i=1:n
-%     for j=i+1:n
-%         i_dist_to_net = sqrt(sum((repmat(x(i,:),m,1)-y).^2,2));
-%         j_dist_to_net = sqrt(sum((repmat(x(j,:),m,1)-y).^2,2));
-%         net_dist = i_dist_to_net + j_dist_to_net;
-%         [min_dist,min_ind] = min(net_dist);
-%         straight_dist = sqrt(sum((x(i,:)-x(j,:)).^2,2));
-%         if min_dist<straight_dist
-%             dists(m+i,m+j) = min_dist;
-%             dists(m+j,m+i) = min_dist;
-%             next(m+i,m+j) = min_ind;
-%             next(m+j,m+i) = min_ind;
-%         else
-%             dists(m+i,m+j) = straight_dist;
-%             dists(m+j,m+i) = sraight_dist;
-%             next(m+i,m+j) = m+j;
-%             next(m+j,m+i) = m+i;
-%         end
-%     end
-% end
-% Compute edge weights
+[edges,edge_costs,edge_weights,net_edges,dists,next,top_change] = getCostsWeights(y,N,dist_mat,net_edges,mass,alpha,lambda,check_top);
+energy = calculateEnergy(y,x,edges,edge_costs);
+%num_intern_edges = sum(col<=m); %the internal edges are the first listed in edges_list
+
+%if check_top
+if check_top && e_heur
+    %Check adding edges with large ratio of intrinsic to extrinsic distance
+    dist_ratios = triu(dists(1:m,1:m)./eucdist_mat(1:m,1:m),1);
+    dist_ratios(eucdist_mat(1:m,1:m)==0) = 0;
+    dist_ratios(eucdist_mat(1:m,1:m)>delta) = 0; %don't check vertices further than delta apart
+    net_inds1 = sub2ind(size(dist_ratios),net_edges(:,1),net_edges(:,2));
+    net_inds2 = sub2ind(size(dist_ratios),net_edges(:,2),net_edges(:,1));
+    net_inds = [net_inds1;net_inds2];
+    dist_ratios(net_inds) = 0;
+    counts = histcounts([net_edges(:,1);net_edges(:,2)],1:m+1);
+%     nonvert_inds = counts==2; %only check between topological vertices
+%     dist_ratios(nonvert_inds,:) = 0;
+%     dist_ratios(:,nonvert_inds) = 0;
+    vert_inds = counts~=2; % only check between non-topological vertices
+    dist_ratios(vert_inds,:) = 0;
+    dist_ratios(:,vert_inds) = 0;
+    dist_ratios = dist_ratios.^2;
+    if any(any(dist_ratios>0))
+        [i,j] = ind2sub([m,m],randsample(m^2,1,true,dist_ratios(1:m^2)));
+        if ~edgeIntersects(y,net_edges,[i,j])
+            edge_len = eucdist_mat(i,j); %discretize new edge
+            net_len = sum(sqrt(sum((y(net_edges(:,1),:)-y(net_edges(:,2),:)).^2,2)));
+            avg_elen = net_len/length(net_edges(:,1));
+            n_new_e = ceil(edge_len/avg_elen);
+            if n_new_e>1
+                new_edges = [i,m+1;(m+1:m+n_new_e-2)',(m+2:m+n_new_e-1)';m+n_new_e-1,j];
+            else
+                new_edges = [i,j];
+            end
+            net_edges_new = [net_edges;new_edges]; 
+            t = (1/n_new_e:1/n_new_e:1-1/n_new_e)';
+            new_points = (1-t).*y(i,:) + t.*y(j,:);
+            n_new_p = length(new_points(:,1));
+            y_new = [y;new_points]; 
+            %eucdist_mat and dist_mat need extending to account for new points
+            eucdist_mat_new = zeros(N+n_new_p,N+n_new_p);
+            old_inds = [1:m,m+n_new_p+1:N+n_new_p];
+            eucdist_mat_new(old_inds,old_inds) = eucdist_mat;
+            new_dists = pdist2(new_points,[y;x]);
+            eucdist_mat_new(m+1:m+n_new_p,old_inds) = new_dists;
+            eucdist_mat_new(old_inds,m+1:m+n_new_p) = new_dists';
+            eucdist_mat_new(m+1:m+n_new_p,m+1:m+n_new_p) = pdist2(new_points,new_points);
+            net_inds1 = sub2ind(size(eucdist_mat_new),net_edges_new(:,1),net_edges_new(:,2));
+            net_inds2 = sub2ind(size(eucdist_mat_new),net_edges_new(:,2),net_edges_new(:,1));
+            net_inds = [net_inds1;net_inds2];
+            dist_mat_new = eucdist_mat_new;
+            dist_mat_new(net_inds) = alpha*eucdist_mat_new(net_inds);
+            N_new = N + n_new_p;
+            [edges_new,edge_costs_new,edge_weights_new,net_edges_new,dists_new,next_new] = getCostsWeights(y_new,N_new,dist_mat_new,net_edges_new,mass,alpha,lambda,0);
+            energy_new = calculateEnergy(y_new,x,edges_new,edge_costs_new);
+            %display(y([i,j],:))
+            if energy_new<energy
+                edges=edges_new; edge_costs=edge_costs_new; edge_weights=edge_weights_new; net_edges=net_edges_new; dists=dists_new; next = next_new;
+                y = y_new; m = length(y_new(:,1));
+                fprintf('\n EDGE ADDED')
+            end
+        end
+    end
+end
+
+pos_edges = edges(edge_weights>0,:);
+removals = setdiff(1:m,union(pos_edges(:,1),pos_edges(:,2))); %remove points that have no mass going through them
+for i=1:length(removals)
+    rem_bool = edges(:,1) == removals(end-i+1) | edges(:,2) == removals(end-i+1);
+    edges(rem_bool,:) = [];
+    edge_costs(rem_bool,:) = [];
+    edge_weights(rem_bool,:) = [];
+    rem_bool = net_edges(:,1) == removals(end-i+1) | net_edges(:,2) == removals(end-i+1);
+    net_edges(rem_bool,:) = [];
+    %make the above lines more efficient?
+    edges = edges - double(edges>removals(end-i+1));
+    net_edges = net_edges - double(net_edges>removals(end-i+1));
+end
+y(removals,:) = [];
+m = length(y(:,1));
+y_net_edge_inds = cell(m,1);
+neighbors = cell(m,1);
+for i=1:length(net_edges(:,1))
+    neighbors{net_edges(i,1)} = union([neighbors{net_edges(i,1)}], net_edges(i,2));
+    neighbors{net_edges(i,2)} = union([neighbors{net_edges(i,2)}], net_edges(i,1));
+    y_net_edge_inds{net_edges(i,1)} = sort([y_net_edge_inds{net_edges(i,1)},i]);
+    y_net_edge_inds{net_edges(i,2)} = sort([y_net_edge_inds{net_edges(i,2)},i]);
+end
+
+[~,sort_I] = sort(edges(:,1));
+edges = edges(sort_I,:);
+edge_weights = edge_weights(sort_I);
+edge_costs = edge_costs(sort_I);
+z = [];
+b = [];
+
+end
+
+
+
+function [edges,edge_costs,edge_weights,net_edges,dists,next,top_change] = getCostsWeights(y,N,dist_mat,net_edges,mass,alpha,lambda,check_top)
+
+m = length(y(:,1));
+[dists,next] = floyd(m,dist_mat); %note the matrix 'next' may be inaccurate after any potential topological changes (further below)
 weights_mat = zeros(N,N);
 for i=m+1:N
     for j=i+1:N
@@ -77,11 +187,7 @@ for i=m+1:N
     end
 end
 
-% for i=1:length(net_edges)
-%     weights_mat(net_edges(i,1),net_edges(i,2)) = weights_mat(net_edges(i,1),net_edges(i,2))*alpha + lambda;
-%     weights_mat(net_edges(i,2),net_edges(i,1)) = weights_mat(net_edges(i,1),net_edges(i,2));
-% end
-costs_mat = weights_mat;  %should update costs if net_edges are changed
+costs_mat = weights_mat; 
 for i=1:length(net_edges(:,1))
     costs_mat(net_edges(i,1),net_edges(i,2)) = costs_mat(net_edges(i,1),net_edges(i,2))*alpha + lambda;
     costs_mat(net_edges(i,2),net_edges(i,1)) = costs_mat(net_edges(i,1),net_edges(i,2));
@@ -93,132 +199,71 @@ edge_weights = weights_mat(k);
 edge_costs = costs_mat(k);
 [row,col] = ind2sub(size(weights_mat),k); %the entries in col are increasing
 edges = [col,row];
-edges(col<row,:) = [row(col<row),col(col<row)]; %first index is always greater than second index
-net_edge_inds = edge_weights>lambda/(1-alpha);
-if check_top
-    net_edges = edges(net_edge_inds,:);
-    net_edges = fliplr(net_edges);
-    net_edges = net_edges(net_edges(:,2)<=m,:);
-end
-%num_intern_edges = sum(col<=m); %the internal edges are the first listed in edges_list
-
-removals = setdiff(1:m,union(edges(:,1),edges(:,2)));
-for i=1:length(removals)
-    edges = edges - double(edges>removals(end-i+1));
-    net_edges = net_edges - double(net_edges>removals(end-i+1));
-end
-y(removals,:) = [];
-m = length(y(:,1));
-y_net_edge_inds = cell(m,1);
-neighbors = cell(m,1);
-for i=1:length(net_edges(:,1))
-    neighbors{net_edges(i,1)} = sort([neighbors{net_edges(i,1)}, net_edges(i,2)]);
-    neighbors{net_edges(i,2)} = sort([neighbors{net_edges(i,2)}, net_edges(i,1)]);
-    y_net_edge_inds{net_edges(i,1)} = sort([y_net_edge_inds{net_edges(i,1)},i]);
-    y_net_edge_inds{net_edges(i,2)} = sort([y_net_edge_inds{net_edges(i,2)},i]);
-end
-
-removals2 = setdiff(1:m,edges((edges(:,1)>m),2)); %remove points where data don't 'go'
-removals2 = fliplr(removals2); %so it is in descending order (setdiff sorts them)
-%y(removals2,:) = [];
-%net_edge_rem_inds = [];
-for i=1:length(removals2)
-    rem_i = removals2(i);
-    neighs = neighbors{rem_i};
+cr = col<row;
+edges(cr,:) = [row(cr),col(cr)]; %ensures first index is always greater than second index
+top_change = 0;
+if check_top %add/remove only one edge with highest/lowest weight
+    %[max_weight,max_ind] = max(edge_weights);
+    flipinds = net_edges(:,1)<net_edges(:,2);
+    net_edges(flipinds,:) = [net_edges(flipinds,2),net_edges(flipinds,1)];
+    [net_bool,net_locs] = ismember(edges,net_edges,'rows');  %inefficient?
     
-    if length(neighs) < 3  %only remove points of degree < 3
-        y(rem_i,:) = [];
-        if ~isempty(neighs)
-            neighbors{neighs(1)} = setdiff(neighbors{neighs(1)},rem_i);
-            y_net_edge_inds{neighs(1)} = setdiff(y_net_edge_inds{neighs(1)},y_net_edge_inds{rem_i});
-            if isempty(neighbors{neighs(1)})
-                neighbors{neighs(1)} = []; %just for the assert statement below
-                y_net_edge_inds{neighs(1)} = [];
-            end
-            
-            if length(neighs) == 2
-                coef = 0;
-                if ~ismember(neighs(1),neighbors{neighs(2)}) % then edge will be added to network
-                    coef = 1;
-                end
-                eind1 = edges(:,1) == max(rem_i,neighs(1)) & edges(:,2) == min(rem_i,neighs(1));
-                eind2 = edges(:,1) == max(rem_i,neighs(2)) & edges(:,2) == min(rem_i,neighs(2));
-                new_weight = edge_weights(eind1);
-                assert(new_weight == edge_weights(eind2));
-                new_edge = edges(:,1) == max(neighs(1),neighs(2)) & edges(:,2) == min(neighs(1),neighs(2));
-                if any(new_edge) % if edge already exists
-                    edge_weights(new_edge) = edge_weights(new_edge) + new_weight;
-                    edge_costs(new_edge) = edge_costs(new_edge) + new_weight*alpha;
-                else % if edge doesn't exist, add it
-                    edges = [edges; sort([neighs(1),neighs(2)],'descend')];
-                    edge_weights = [edge_weights;new_weight];
-                    edge_costs = [edge_costs;new_weight*alpha+lambda*coef];
-                end
-                
-                net_edges = [net_edges;[neighs(1),neighs(2)]];
-                neighbors{neighs(2)} = union(setdiff(neighbors{neighs(2)},rem_i),neighs(1));
-                neighbors{neighs(1)} = union(neighbors{neighs(1)},neighs(2));
-                y_net_edge_inds{neighs(1)} = union(y_net_edge_inds{neighs(1)},length(net_edges));
-                y_net_edge_inds{neighs(2)} = union(setdiff(y_net_edge_inds{neighs(2)},y_net_edge_inds{rem_i}),length(net_edges));
-            end
-            
-            rem_edges = edges(:,1) == rem_i | edges(:,2) == rem_i;
-            edges(rem_edges,:) = [];
-            edge_weights(rem_edges,:) = [];
-            edge_costs(rem_edges,:) = [];
-            
-            rem_net_edges = find(net_edges(:,1) == rem_i | net_edges(:,2) == rem_i);
-            net_edges(rem_net_edges,:) = [];
-            rev_sorts = sort(rem_net_edges,'descend');
-            for j=1:length(y_net_edge_inds)
-                    for k=1:length(rev_sorts)
-                        y_net_edge_inds{j} = y_net_edge_inds{j} - double(y_net_edge_inds{j}>rev_sorts(k));
-                    end
-            end
-            
-%             if ~ismember(y_net_edge_inds{rem_i},net_edge_rem_inds) 
-%                 net_edge_rem_inds = [net_edge_rem_inds, y_net_edge_inds{rem_i}];
-%                 net_edges(y_net_edge_inds{rem_i},:) = [];
-%                 rev_sorts = sort(y_net_edge_inds{rem_i},'descend');
-%                 for j=1:length(y_net_edge_inds)
-%                     for k=1:length(rev_sorts)
-%                         y_net_edge_inds{j} = y_net_edge_inds{j} - double(y_net_edge_inds{j}>rev_sorts(k));
-%                     end
-%                 end
-%             end
-            
-            
-        end
-        net_edges = net_edges - double(net_edges>rem_i);
-        edges = edges - double(edges>rem_i);
-        y_net_edge_inds = {y_net_edge_inds{1:rem_i-1},y_net_edge_inds{rem_i+1:end}}';
-        neighbors = {neighbors{1:rem_i-1},neighbors{rem_i+1:end}}';
-        for j=1:length(neighbors)
-            neighbors{j} = neighbors{j} - double(neighbors{j}>rem_i);
+    [max_w,max_ind] = max(edge_weights(~net_bool & edges(:,1)<=m,:));  %only adds edges on y (can change to allow adding edges to data)
+    if max_w>lambda/(1-alpha)
+        net_inds = find(~net_bool & edges(:,1)<=m);
+        new_edge = edges(net_inds(max_ind),:);
+        if ~edgeIntersects(y,net_edges,new_edge)
+            net_edges = [net_edges;new_edge];
+            edge_costs(net_inds(max_ind)) = edge_weights(net_inds(max_ind))*alpha + lambda;
+            top_change = 1;
         end
     end
-end
-if ~isempty(removals2)
-    y_net_edge_inds1 = cell(size(neighbors));
-    neighbors1 = cell(size(neighbors));
-    for i=1:length(net_edges(:,1))
-        neighbors1{net_edges(i,1)} = sort([neighbors1{net_edges(i,1)}, net_edges(i,2)]);
-        neighbors1{net_edges(i,2)} = sort([neighbors1{net_edges(i,2)}, net_edges(i,1)]);
-        y_net_edge_inds1{net_edges(i,1)} = sort([y_net_edge_inds1{net_edges(i,1)},i]);
-        y_net_edge_inds1{net_edges(i,2)} = sort([y_net_edge_inds1{net_edges(i,2)},i]);
+    
+    zero_inds = edge_weights(net_bool,:)==0;
+    if any(zero_inds) %Remove edges with zero mass
+        net_loc_inds = net_locs(net_locs>0);
+        net_rem_inds = net_loc_inds(zero_inds);
+        net_inds = find(net_bool);
+        edge_rem_inds = net_inds(zero_inds);
+        net_edges(net_rem_inds,:) = [];
+        edges(edge_rem_inds,:) = [];
+        edge_costs(edge_rem_inds,:) = [];
+        edge_weights(edge_rem_inds,:) = [];
+        %net_bool(edge_rem_inds) = [];
+        %net_locs(edge_rem_inds) = [];
+    else
+        %Remove edge with smallest weight below lambda/(1-alpha)
+        [min_w,min_ind] = min(edge_weights(net_bool,:));
+        if min_w<lambda/(1-alpha)
+            rem_ind = net_locs(net_locs>0);
+            rem_ind = rem_ind(min_ind);
+            %net_rem_inds = [net_rem_inds;net_loc_inds(min_ind)];
+            net_edges(rem_ind,:) = [];
+            net_inds = find(net_bool);
+            edge_costs(net_inds(min_ind)) = edge_weights(net_inds(min_ind));
+            top_change = 1;
+        end
     end
-    assert(isequal(neighbors,neighbors1));
-    assert(isequal(y_net_edge_inds,y_net_edge_inds1));
+
+    net_edges = fliplr(net_edges);
+      %Add all edges simultaneously
+%     net_edge_inds = edge_weights>lambda/(1-alpha);
+%     if sum(net_edge_inds>0)
+%         net_edges = edges(net_edge_inds,:);
+%         net_edges = fliplr(net_edges);
+%         net_edges = net_edges(net_edges(:,2)<=m,:);
+%         costs_mat = weights_mat;  %should update costs if net_edges are changed
+%         for i=1:length(net_edges(:,1))
+%             costs_mat(net_edges(i,1),net_edges(i,2)) = costs_mat(net_edges(i,1),net_edges(i,2))*alpha + lambda;
+%             costs_mat(net_edges(i,2),net_edges(i,1)) = costs_mat(net_edges(i,1),net_edges(i,2));
+%         end
+%     end
 end
-% removals = cellfun('isempty', neighbors);
-[~,sort_I] = sort(edges(:,1));
-edges = edges(sort_I,:);
-edge_weights = edge_weights(sort_I);
-edge_costs = edge_costs(sort_I);
-z = [];
-b = [];
+%edge_costs = costs_mat(k);
 
 end
+
+
 
 function [ dists,next ] = floyd(m,weight_mat )
 %FLOYD Computes all pairs shortest paths on a graph
@@ -248,6 +293,25 @@ end
 % [I,J] = ind2sub(size(adj_indices),find(adj_indices));
 % dists(adj_indices) = weight_mat(m+I,m+J);
 % next(adj_indices) = m+J;
+end
+
+
+
+function intersect_bool = edgeIntersects(y,net_edges,new_edge)
+
+ne = length(net_edges(:,1));
+x0 = y(new_edge(1),:); 
+v0 = y(new_edge(2),:) - y(new_edge(1),:);
+intersect_bool = false;
+for i=1:ne
+    x1 = y(net_edges(i,1),:);
+    v1 = y(net_edges(i,2),:) - y(net_edges(i,1),:);
+    st = linsolve([-v0',v1'],x0'-x1');
+    if all(st<1 & st>0) %check if lines x0 + s*v0, x1 + t*v1 intersect
+        intersect_bool = true;
+        break;
+    end
+end
 end
 
 function p = path(next,i,j)

@@ -1,4 +1,4 @@
-function [] = plotADP(x,y,arcs,mass,I,cm_bool,rgb_c,linestyle)
+function [] = plotADP(x,y,arcs,verts,mass,I,cm_bool,rgb_c,linestyle)
 % plots curve, data, to the current figure. If I and mass are specified as
 % nonempty and cm_bool = 1 the curve of the projecting center of masses
 % will also be plotted. Can leave F and iter as empty if movie is not being
@@ -17,8 +17,9 @@ if ~isempty(I) && cm_bool == 1
         x_means(i,:) = sum(bsxfun(@times,mass(I==i),x(I==i,:)'),2)/y_mass(i);
     end
 end
-
+hold on;
 if d==2
+    scatter(y(verts,1),y(verts,2),200,[1,0,0],'*');
     if ~isempty(x)
         %scatter(x(:,1),x(:,2),15,[.7,.7,.7],'.');
         scatter(x(:,1),x(:,2),50,[0,0,0],'.');
@@ -32,7 +33,6 @@ if d==2
 %         end
     end
     
-    hold on;
     for i=1:num_arcs
         %comp_y = y(cut_partition(j-1)+1:cut_partition(j),:);
         comp_y = y(arcs{i},:);
@@ -47,8 +47,9 @@ if d==2
         end
     end
     
-else if d==3
-        plot3dADP(x,y,cut_indices,cut_partition,x_means,cm_bool,rgb_c,linestyle);
+else
+    if d==3
+        plot3dADP(x,y,arcs,verts,x_means,cm_bool,rgb_c,linestyle);
         %scatter3(y(singletons,1),y(singletons,2),y(singletons,3),30,rgb_c,'filled','o');
     else % if d>3, visualize in first 3 principal components
         n = length(x(:,1));
@@ -57,7 +58,7 @@ else if d==3
             coeff = pca(x-repmat(mean_x,n,1));
             x_red = x*coeff(:,1:3);
             y_red = y*coeff(:,1:3);
-            plot3dADP(x_red,y_red,cut_indices,cut_partition,x_means,cm_bool,rgb_c,linestyle);
+            plot3dADP(x_red,y_red,arcs,verts,x_means,cm_bool,rgb_c,linestyle);
             %scatter3(y_red(singletons,1),y_red(singletons,2),y_red(singletons,3),30,rgb_c,'filled','o');
         end
     end
@@ -67,8 +68,9 @@ hold off;
 axis equal;
 end
 
-function [] = plot3dADP(x,y,arcs,x_means,cm_bool,rgb_c,linestyle)
+function [] = plot3dADP(x,y,arcs,verts,x_means,cm_bool,rgb_c,linestyle)
 
+scatter(y(verts,1),y(verts,2),y(verts,3),200,[1,0,0],'*');
 if ~isempty(x)
     scatter3(x(:,1),x(:,2),x(:,3),25,[0,0,0],'.');
 end

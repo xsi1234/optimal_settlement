@@ -35,6 +35,10 @@ function test_integrated(test_case, outer_iter_num, inner_iter_num)
         Optimize_network8(outer_iter_num, inner_iter_num);
     elseif test_case == 9
         Optimize_network9(outer_iter_num, inner_iter_num);
+    elseif test_case == 92
+        Optimize_network92(outer_iter_num, inner_iter_num);   
+    elseif test_case == 93
+        Optimize_network93(outer_iter_num, inner_iter_num);
     elseif test_case == 10
         Optimize_network10(outer_iter_num, inner_iter_num);
     elseif test_case == 11
@@ -53,10 +57,9 @@ function Optimize_network8(outer_iter, inner_iter)
         n_ri = round(2*pi*i);
         thetas = (2*pi/n_ri:2*pi/n_ri:2*pi)'-(pi/n_ri);
         x = [x;r_i*cos(thetas),r_i*sin(thetas)];
-    end
+    end;
     n = length(x(:,1))
-    total_mass = 1;
-    mass = total_mass*ones(1,n)/n;
+    mass = 1/320*ones(1,n);
     nb = 8; rng(2);
     b_len = .3;
     thetas = (2*pi/nb:2*pi/nb:2*pi) + pi/nb + pi/4/nb*rand(1,nb);
@@ -94,7 +97,9 @@ function Optimize_network8(outer_iter, inner_iter)
     vert_indices = [];
     vert_neighs = [];
     arcs = [];
-    
+    alpha_2 = 0.2;
+    theta = 0.5;
+    sigma = 0.05;    
     lambda1 = .02;
     rho0 = .5;
     tol = 0.5*10^-4;
@@ -105,25 +110,22 @@ function Optimize_network8(outer_iter, inner_iter)
     pause_bool = 0;
     delta = 0;
     max_e_leng = 2;
-    theta = 0.5;
-    alpha_2 = 0.2;
-    sigma = 0.05;
     maximize_subroutine(y0,cut_indices0,net_edges0,vert_indices,vert_neighs,arcs,x,mass,lambda1,alpha,tol,rho0,...
-            max_m,max_avg_turn,normalize_data,pause_bool,delta,max_e_leng,outer_iter,inner_iter, theta, alpha_2, sigma, n);
+            max_m,max_avg_turn,normalize_data,pause_bool,delta,max_e_leng,outer_iter,inner_iter, theta, alpha_2, sigma, n);;
 end
 
 function Optimize_network(outer_iter, inner_iter)
     x = [0,0;0,1;1,1;1,0];
-    n = size(X, 1);
-    total_mass = 1;
-    mass = total_mass*ones(1,n)/n;
+    mass = 1/4*ones(1,4);
     [ y0,net_edges0 ] = rndInitialize(x,20);
 
     cut_indices0 = [];
     vert_indices = [];
     vert_neighs = [];
     arcs = [];
-
+    alpha_2 = 0.2;
+    theta = 0.5;
+    sigma = 0.05;
     lambda1 = .05;
     rho0 = .01;
     tol = 10^-4;
@@ -134,11 +136,8 @@ function Optimize_network(outer_iter, inner_iter)
     pause_bool = 0;
     delta = 0;
     max_e_leng = .2;
-    theta = 0.5;
-    alpha_2 = 0.2;
-    sigma = 0.05;
     maximize_subroutine(y0,cut_indices0,net_edges0,vert_indices,vert_neighs,arcs,x,mass,lambda1,alpha,tol,rho0,...
-            max_m,max_avg_turn,normalize_data,pause_bool,delta,max_e_leng,outer_iter,inner_iter, theta, alpha_2, sigma, n);
+            max_m,max_avg_turn,normalize_data,pause_bool,delta,max_e_leng,outer_iter,inner_iter, theta, alpha_2, sigma, n);;
 end
 
 function Optimize_network1(outer_iter, inner_iter)
@@ -154,7 +153,7 @@ function Optimize_network1(outer_iter, inner_iter)
     x3(:,2) = -x2(:,1);
     x = [x1;x2;x3] + .1*randn(n,2);
     total_mass = 1;
-    mass = total_mass*ones(1,n)/n;
+    mass = total_mass/n*ones(1,n);
 
     rng(13);
     y0(:,1) = -sqrt(2):sqrt(2)/(m/3-1):0;
@@ -165,7 +164,9 @@ function Optimize_network1(outer_iter, inner_iter)
     vert_neighs = {2,[m/3-1,m/3+1,2*m/3+1],2*m/3-1,m-1};
     arcs = {1:m/3,m/3:2*m/3,[m/3,2*m/3+1:m]};
     net_edges0 = [];
-
+    alpha_2 = 0.2;
+    theta = 0.5;
+    sigma = 0.05;
     lambda1 = .02;
     rho0 = .1;
     tol = 10^-4;
@@ -176,11 +177,8 @@ function Optimize_network1(outer_iter, inner_iter)
     pause_bool = 0;
     delta = 0;
     max_e_leng = .2;
-    theta = 0.5;
-    alpha_2 = 0.2;
-    sigma = 0.05;
     maximize_subroutine(y0,cut_indices0,net_edges0,vert_indices,vert_neighs,arcs,x,mass,lambda1,alpha,tol,rho0,...
-            max_m,max_avg_turn,normalize_data,pause_bool,delta,max_e_leng,outer_iter,inner_iter, theta, alpha_2, sigma, n);
+            max_m,max_avg_turn,normalize_data,pause_bool,delta,max_e_leng,outer_iter,inner_iter, theta, alpha_2, sigma, n);;
 end
     
 function Optimize_network2(outer_iter, inner_iter)
@@ -196,7 +194,7 @@ function Optimize_network2(outer_iter, inner_iter)
     x3(:,2) = -x2(:,1);
     x = [x1;x2;x3] + .1*randn(n,2);
     total_mass = 1;
-    mass = total_mass*ones(1,n)/n;
+    mass = total_mass/n*ones(1,n);
 
     rng(13);
     y0(:,1) = -sqrt(2):sqrt(2)/(m/3-1):0;
@@ -207,7 +205,9 @@ function Optimize_network2(outer_iter, inner_iter)
     vert_neighs = {2,[m/3-1,m/3+1,2*m/3+1],2*m/3-1,m-1};
     arcs = {1:m/3,m/3:2*m/3,[m/3,2*m/3+1:m]};
     net_edges0 = [];
-
+    alpha_2 = 0.2;
+    theta = 0.5;
+    sigma = 0.05;
     lambda1 = .02;
     rho0 = .2;
     tol = 10^4;
@@ -218,21 +218,17 @@ function Optimize_network2(outer_iter, inner_iter)
     pause_bool = 0;
     delta = 0;
     max_e_leng = .2;
-    theta = 0.5;
-    alpha_2 = 0.2;
-    sigma = 0.05;
     maximize_subroutine(y0,cut_indices0,net_edges0,vert_indices,vert_neighs,arcs,x,mass,lambda1,alpha,tol,rho0,...
-        max_m,max_avg_turn,normalize_data,pause_bool,delta,max_e_leng,outer_iter,inner_iter, theta, alpha_2, sigma, n);
+        max_m,max_avg_turn,normalize_data,pause_bool,delta,max_e_leng,outer_iter,inner_iter, theta, alpha_2, sigma, n);;
 end
 
 function Optimize_network3(outer_iter, inner_iter)
     rng(2);
     n = 200;
     v = (0:2*pi/(n-1):2*pi)';
-    x = [cos(v),sin(v)] + .1*randn(n,2);
+    x = 0.5*[cos(v),sin(v)] + .2*randn(n,2);
     total_mass = 1;
-    mass = total_mass*ones(1,n)/n;
-
+    mass = total_mass/n*ones(1,n);
     m = 2*10;
     y0 = [[(0:1/(m/2-1):1)',.2*ones(m/2,1)];[flipud((0:1/(m/2-1):1)'),.2*ones(m/2,1)]];
     cut_indices0 = [];
@@ -245,16 +241,16 @@ function Optimize_network3(outer_iter, inner_iter)
     tol = 10^-4;
     alpha = .5;
     max_m = 25;
+    alpha_2 = 0.2;
+    theta = 0.5;
+    sigma = 0.05;
     max_avg_turn = [];
     normalize_data = 0;
     pause_bool = 0;
     delta = 0;
     max_e_leng = .2;
-    theta = 0.5;
-    alpha_2 = 0.2;
-    sigma = 0.05;
     maximize_subroutine(y0,cut_indices0,net_edges0,vert_indices,vert_neighs,arcs,x,mass,lambda1,alpha,tol,rho0,...
-        max_m,max_avg_turn,normalize_data,pause_bool,delta,max_e_leng,outer_iter,inner_iter, theta, alpha_2, sigma, n);
+        max_m,max_avg_turn,normalize_data,pause_bool,delta,max_e_leng,outer_iter,inner_iter, theta, alpha_2, sigma, n);;
 end    
 
 function Optimize_network4(outer_iter, inner_iter)
@@ -276,7 +272,9 @@ function Optimize_network4(outer_iter, inner_iter)
     vert_indices = [];
     vert_neighs = [];
     arcs = [];
-
+    alpha_2 = 0.2;
+    theta = 0.5;
+    sigma = 0.05;
     lambda1 = .05;
     rho0 = .1;
     tol = 10^-4;
@@ -287,11 +285,8 @@ function Optimize_network4(outer_iter, inner_iter)
     pause_bool = 0;
     delta = 0;
     max_e_leng = 10;
-    theta = 0.5;
-    alpha_2 = 0.2;
-    sigma = 0.05;
     maximize_subroutine(y0,cut_indices0,net_edges0,vert_indices,vert_neighs,arcs,x,mass,lambda1,alpha,tol,rho0,...
-        max_m,max_avg_turn,normalize_data,pause_bool,delta,max_e_leng,outer_iter,inner_iter, theta, alpha_2, sigma, n);
+        max_m,max_avg_turn,normalize_data,pause_bool,delta,max_e_leng,outer_iter,inner_iter, theta, alpha_2, sigma, n);;
 end
 
 function Optimize_network5(outer_iter, inner_iter)
@@ -301,8 +296,7 @@ function Optimize_network5(outer_iter, inner_iter)
     x = [x1,x2];
     n = length(x1);
     total_mass = 1;
-    mass = total_mass*ones(1,n)/n;
-
+    mass = total_mass/n*ones(1,n);
     rng(1);
     [ y0,net_edges0 ] = rndInitialize(x,15);
 
@@ -310,7 +304,9 @@ function Optimize_network5(outer_iter, inner_iter)
     vert_indices = [];
     vert_neighs = [];
     arcs = [];
-
+    alpha_2 = 0.2;
+    theta = 0.5;
+    sigma = 0.05;
     lambda1 = .02;
     rho0 = .01;
     tol = 10^-4;
@@ -321,11 +317,8 @@ function Optimize_network5(outer_iter, inner_iter)
     pause_bool = 0;
     delta = 0;
     max_e_leng = 2;
-    theta = 0.5;
-    alpha_2 = 0.2;
-    sigma = 0.05;
     maximize_subroutine(y0,cut_indices0,net_edges0,vert_indices,vert_neighs,arcs,x,mass,lambda1,alpha,tol,rho0,...
-        max_m,max_avg_turn,normalize_data,pause_bool,delta,max_e_leng,outer_iter,inner_iter, theta, alpha_2, sigma, n);
+        max_m,max_avg_turn,normalize_data,pause_bool,delta,max_e_leng,outer_iter,inner_iter, theta, alpha_2, sigma, n);;
 end
 
 function Optimize_network6(outer_iter, inner_iter)
@@ -358,7 +351,9 @@ function Optimize_network6(outer_iter, inner_iter)
     vert_indices = [];
     vert_neighs = [];
     arcs = [];
-
+    alpha_2 = 0.2;
+    theta = 0.5;
+    sigma = 0.05;
     lambda1 = .02;
     rho0 = .01;
     tol = 10^-4;
@@ -369,11 +364,8 @@ function Optimize_network6(outer_iter, inner_iter)
     pause_bool = 0;
     delta = .1;
     max_e_leng = .2;
-    theta = 0.5;
-    alpha_2 = 0.2;
-    sigma = 0.05;
     maximize_subroutine(y0,cut_indices0,net_edges0,vert_indices,vert_neighs,arcs,x,mass,lambda1,alpha,tol,rho0,...
-        max_m,max_avg_turn,normalize_data,pause_bool,delta,max_e_leng,outer_iter,inner_iter, theta, alpha_2, sigma, n);
+        max_m,max_avg_turn,normalize_data,pause_bool,delta,max_e_leng,outer_iter,inner_iter, theta, alpha_2, sigma, n);;
 end
 
 function Optimize_network7(outer_iter, inner_iter)
@@ -395,8 +387,7 @@ function Optimize_network7(outer_iter, inner_iter)
     n = length(x(:,1))
     %mass = 1/n*ones(1,n);
     total_mass = 1;
-    mass = total_mass*ones(1,n)/n;
-
+    mass = total_mass/n*ones(1,n);
     %[ y0,net_edges0 ] = rndInitialize(x,30);
     %Circle
     %         m0 = 30;
@@ -464,7 +455,9 @@ function Optimize_network7(outer_iter, inner_iter)
     vert_indices = [];
     vert_neighs = [];
     arcs = [];
-
+    alpha_2 = 0.2;
+    theta = 0.5;
+    sigma = 0.05;
     lambda1 = .02;
     rho0 = .5;
     tol = 0.5*10^-4;
@@ -475,16 +468,13 @@ function Optimize_network7(outer_iter, inner_iter)
     pause_bool = 0;
     delta = 0;
     max_e_leng = 2;
-    theta = 0.5;
-    alpha_2 = 0.2;
-    sigma = 0.05;
     maximize_subroutine(y0,cut_indices0,net_edges0,vert_indices,vert_neighs,arcs,x,mass,lambda1,alpha,tol,rho0,...
-        max_m,max_avg_turn,normalize_data,pause_bool,delta,max_e_leng,outer_iter,inner_iter, theta, alpha_2, sigma, n);
+        max_m,max_avg_turn,normalize_data,pause_bool,delta,max_e_leng,outer_iter,inner_iter, theta, alpha_2, sigma, n);;
 end
 
 function Optimize_network9(outer_iter, inner_iter)
     del_r = .1;
-    n_r = 7;
+    n_r = 9;
     x = [0,0];
     for i=1:n_r
         r_i = i*del_r;
@@ -492,10 +482,12 @@ function Optimize_network9(outer_iter, inner_iter)
         thetas = (2*pi/n_ri:2*pi/n_ri:2*pi)'-(pi/n_ri);
         x = [x;r_i*cos(thetas),r_i*sin(thetas)];
     end
+    x=0.4*x;
     n = length(x(:,1))
-    total_mass = 1;
-    mass = total_mass*ones(1,n)/n;
-    nb = 3; rng(2);
+    total_mass=1;
+    mass = (total_mass/n)*ones(1,n);
+
+    nb = 3; rng(1);
     b_len = .15;
     thetas = (2*pi/nb:2*pi/nb:2*pi) + pi/nb + pi/4/nb*rand(1,nb);
     r0 = 0.3;
@@ -517,26 +509,132 @@ function Optimize_network9(outer_iter, inner_iter)
         net_edges0 = [net_edges0;m+5,m+6];
         m = m+6;
     end
+    y0=0.5*y0;
+    mm=m;
     cut_indices0 = [];
     vert_indices = [];
     vert_neighs = [];
     arcs = [];
-
+    alpha_2 = 0.2;
+    theta = 0.1;
+    sigma = 0.05;    
     lambda1 = .05;
     rho0 = .5;
     tol = 0.5*10^-4;
     alpha = .1;
-    max_m = 100;
+    max_m = 110;
     max_avg_turn = 15;
     normalize_data = 0;
     pause_bool = 0;
     delta = 0;
     max_e_leng = 2;
-    theta = 0.2;
-    alpha_2 = 0.2;
-    sigma = 0.05;
     maximize_subroutine(y0,cut_indices0,net_edges0,vert_indices,vert_neighs,arcs,x,mass,lambda1,alpha,tol,rho0,...
-        max_m,max_avg_turn,normalize_data,pause_bool,delta,max_e_leng,outer_iter,inner_iter, theta, alpha_2, sigma, n);
+        max_m,max_avg_turn,normalize_data,pause_bool,delta,max_e_leng,outer_iter,inner_iter, theta, alpha_2, sigma, n);;
+end
+
+
+function Optimize_network92(outer_iter, inner_iter)
+    del_r = .1;
+    n_r = 9;
+    x = [0,0];
+    for i=1:n_r
+        r_i = i*del_r;
+        n_ri = round(2*pi*i);
+        thetas = (2*pi/n_ri:2*pi/n_ri:2*pi)'-(pi/n_ri);
+        x = [x;r_i*cos(thetas),r_i*sin(thetas)];
+    end
+    x=0.4*x;
+    n = length(x(:,1))
+    total_mass=0.7;
+    mass = (total_mass/n)*ones(1,n);
+
+    nb = 3; rng(1);
+    b_len = .15;
+    thetas = (2*pi/nb:2*pi/nb:2*pi) + pi/nb + pi/4/nb*rand(1,nb);
+    r0 = 0.3;
+    y0 = [];
+    m = 0;
+    net_edges0 = [];
+    for i=1:nb
+        r0 = r0*(0.85+0.3*rand);
+        y0 = [y0;(r0-b_len)*cos(thetas(i)),(r0-b_len)*sin(thetas(i))];
+        y0 = [y0;r0*cos(thetas(i)),r0*sin(thetas(i))];
+        y0 = [y0;(r0+ b_len)*cos(thetas(i)-pi/nb/3),(r0+ b_len)*sin(thetas(i)-pi/nb/3)]; %3
+        y0 = [y0;(r0+ 2.5* b_len)*cos(thetas(i)-pi/nb/6),(r0+ 2.5* b_len)*sin(thetas(i)-pi/nb/6)]; %4
+        y0 = [y0;(r0+ b_len)*cos(thetas(i)+pi/nb/3),(r0+ b_len)*sin(thetas(i)+pi/nb/3)]; % 5
+        y0 = [y0;(r0+ 2.5*b_len)*cos(thetas(i)+pi/nb/6),(r0+2.5* b_len)*sin(thetas(i)+pi/nb/6)]; %6
+        net_edges0 = [net_edges0;m+1,m+2];
+        net_edges0 = [net_edges0;m+2,m+3];
+        net_edges0 = [net_edges0;m+2,m+5];
+        net_edges0 = [net_edges0;m+3,m+4];
+        net_edges0 = [net_edges0;m+5,m+6];
+        m = m+6;
+    end
+    y0=0.5*y0;
+    mm=m;
+    cut_indices0 = [];
+    vert_indices = [];
+    vert_neighs = [];
+    arcs = [];
+    alpha_2 = 0.2;
+    theta = 0.5;
+    sigma = 0.05;    
+    lambda1 = .05;
+    rho0 = .5;
+    tol = 0.5*10^-4;
+    alpha = .1;
+    max_m = 110;
+    max_avg_turn = 15;
+    normalize_data = 0;
+    pause_bool = 0;
+    delta = 0;
+    max_e_leng = 2;
+    maximize_subroutine(y0,cut_indices0,net_edges0,vert_indices,vert_neighs,arcs,x,mass,lambda1,alpha,tol,rho0,...
+        max_m,max_avg_turn,normalize_data,pause_bool,delta,max_e_leng,outer_iter,inner_iter, theta, alpha_2, sigma, n);;
+end
+
+
+function Optimize_network93(outer_iter, inner_iter)
+    del_r = .1;
+    n_r = 8;
+    x = [0,0];
+    for i=1:n_r
+        r_i = i*del_r;
+        n_ri = round(2*pi*i);
+        thetas = (2*pi/n_ri:2*pi/n_ri:2*pi)'-(pi/n_ri);
+        x = [x;r_i*cos(thetas),r_i*sin(thetas)];
+    end
+    x=0.4*x;
+    n = length(x(:,1))
+    total_mass=0.6;
+    mass = (total_mass/n)*ones(1,n);
+    
+    rng(13);
+    m=24;
+    y0(:,1) = -sqrt(2):sqrt(2)/(m/3-1):0;
+    y0(:,2) = zeros(m/3,1);
+    y0 = [y0;zeros(m/3,1),(1/(m/3):1/(m/3):1)';zeros(m/3,1),-(1/(m/3):1/(m/3):1)'];
+    y0=0.4*y0;
+    cut_indices0 = [];
+    vert_indices = [1,m/3,2*m/3,m];
+    vert_neighs = {2,[m/3-1,m/3+1,2*m/3+1],2*m/3-1,m-1};
+    arcs = {1:m/3,m/3:2*m/3,[m/3,2*m/3+1:m]};
+    net_edges0 = [];
+    alpha_2 = 0.2;
+    theta = 0.5;
+    sigma = 0.05;    
+    lambda1 = .05;
+    rho0 = .5;
+    tol = 0.5*10^-4;
+    alpha = .1;
+    max_m = 110;
+    max_avg_turn = 15;
+    normalize_data = 0;
+    pause_bool = 0;
+    delta = 0;
+    max_e_leng = 2;
+    maximize_subroutine(y0,cut_indices0,net_edges0,vert_indices,vert_neighs,arcs,x,mass,lambda1,alpha,tol,rho0,...
+        max_m,max_avg_turn,normalize_data,pause_bool,delta,max_e_leng,outer_iter,inner_iter, theta, alpha_2, sigma, n);;
 end
 
 function Optimize_network10(outer_iter, inner_iter)
@@ -555,8 +653,7 @@ function Optimize_network10(outer_iter, inner_iter)
     n = length(x(:,1))
     %mass = 1/n*ones(1,n);
     total_mass = 1;
-    mass = total_mass*ones(1,n)/n;
-
+    mass = total_mass/n*ones(1,n);
     nb = 9; rng(1);
     b_len = .3;
     thetas = (2*pi/nb:2*pi/nb:2*pi) + pi/nb + pi/4/nb*rand(1,nb);
@@ -595,7 +692,9 @@ function Optimize_network10(outer_iter, inner_iter)
     vert_indices = [];
     vert_neighs = [];
     arcs = [];
-
+    alpha_2 = 0.2;
+    theta = 0.5;
+    sigma = 0.05;
     lambda1 = .02;
     rho0 = .5;
     tol = 0.5*10^-4;
@@ -606,11 +705,8 @@ function Optimize_network10(outer_iter, inner_iter)
     pause_bool = 0;
     delta = 0;
     max_e_leng = 2;
-    theta = 0.5;
-    alpha_2 = 0.2;
-    sigma = 0.05;
     maximize_subroutine(y0,cut_indices0,net_edges0,vert_indices,vert_neighs,arcs,x,mass,lambda1,alpha,tol,rho0,...
-        max_m,max_avg_turn,normalize_data,pause_bool,delta,max_e_leng,outer_iter,inner_iter, theta, alpha_2, sigma, n);
+        max_m,max_avg_turn,normalize_data,pause_bool,delta,max_e_leng,outer_iter,inner_iter, theta, alpha_2, sigma, n);;
 end
 
 function Optimize_network11(outer_iter, inner_iter)
@@ -642,7 +738,7 @@ function Optimize_network11(outer_iter, inner_iter)
     net_edges0=[net_edges0; net_edges1];
 
     total_mass = 1;
-    mass = total_mass*ones(1,n)/n;
+    mass = total_mass/n*ones(1,n);
     net_edges0 = [];
     for i=1:m-1;
         for j=i+1:m
@@ -655,7 +751,9 @@ function Optimize_network11(outer_iter, inner_iter)
     vert_indices = [];
     vert_neighs = [];
     arcs = [];
-
+    alpha_2 = 0.2;
+    theta = 0.5;
+    sigma = 0.05;
     lambda1 = .1;
     rho0 = .5;
     tol = 0.5*10^-4;
@@ -666,9 +764,6 @@ function Optimize_network11(outer_iter, inner_iter)
     pause_bool = 0;
     delta = 0;
     max_e_leng = 2;
-    theta = 0.5;
-    alpha_2 = 0.2;
-    sigma = 0.05;
     maximize_subroutine(y0,cut_indices0,net_edges0,vert_indices,vert_neighs,arcs,x,mass,lambda1,alpha,tol,rho0,...
         max_m,max_avg_turn,normalize_data,pause_bool,delta,max_e_leng,outer_iter,inner_iter, theta, alpha_2, sigma, n);
 end
@@ -689,7 +784,7 @@ function Optimize_network12(outer_iter, inner_iter)
     n = length(x(:,1))
     %mass = 1/n*ones(1,n);
     total_mass = 1;
-    mass = total_mass*ones(1,n)/n;
+    mass = total_mass/n*ones(1,n);
     l=0.55;
     y0=[0,0];
     net_edges0 = [];
@@ -718,7 +813,9 @@ function Optimize_network12(outer_iter, inner_iter)
     vert_indices = [];
     vert_neighs = [];
     arcs = [];
-    
+    alpha_2 = 0.2;
+    theta = 0.5;
+    sigma = 0.05;
     lambda1 = .02;
     rho0 = .5;
     tol = 0.5*10^-4;
@@ -729,9 +826,6 @@ function Optimize_network12(outer_iter, inner_iter)
     pause_bool = 0;
     delta = 0;
     max_e_leng = 2;
-    theta = 0.5;
-    alpha_2 = 0.2;
-    sigma = 0.05;
     maximize_subroutine(y0,cut_indices0,net_edges0,vert_indices,vert_neighs,arcs,x,mass,lambda1,alpha,tol,rho0,...
         max_m,max_avg_turn,normalize_data,pause_bool,delta,max_e_leng,outer_iter,inner_iter, theta, alpha_2, sigma, n);
 end
@@ -745,8 +839,12 @@ function maximize_subroutine(y0,cut_indices0,net_edges0,vert_indices,vert_neighs
     for j = 1:outer_iter
         fprintf('\n outer iter = %d', j);
         tic
-        [y,x,net_edges,~,~,~,~,~,~,~] = mppntest1(y,cut_indices0,net_edges,vert_indices,vert_neighs,arcs,x,mass,lambda1,alpha,tol,rho0,...
-            max_m,max_avg_turn,normalize_data,pause_bool,delta,max_e_leng);
+        if isempty(net_edges0)                                                         % SK
+            net_edges0 = getNetEdges(vert_indices,vert_neighs,arcs,length(y0(:,1)));   %
+        end                                                                            %
+        [y,net_edges,~,~,~,~,~,~] = onut(y,net_edges,x,mass,lambda1,alpha,...        
+            tol,rho0,max_m,max_avg_turn,normalize_data,pause_bool,delta,max_e_leng);   % SK
+        toc
         toc
         p = 3;
         h = 0.005;
@@ -782,5 +880,43 @@ function plot_particles(X, color_mat)
 %     end
     for i = 1:size(X,1)
         plot(X(i,1), X(i,2),'marker','o','markersize',8, 'color',color_mat(i,:));
+    end
+end
+
+function net_edges = getNetEdges(vert_indices,vert_neighs,arcs,m)  % SK
+% This function returns a edge-list representation of the network that is 
+% given as a topological graph
+
+    neighbors = cell(m,1); % cell containing the indices corresponding to the neighbors of each point
+    neighbors(vert_indices) = vert_neighs; %elements of neighbors need not be
+    % ordered, since net_edges need not be oriented in any particular direction.
+    arc_inds = cell(m,1); %entry i gives the arc indices that y_i is contained in
+    y_net_edge_inds = cell(m,1); %entry i gives the net_edge indices that y_i neighbors
+    y_verts = cell(m,1); %entry i gives the topological vert indices that y_i 'neighbors'
+
+    for i=1:length(arcs)
+        arc_inds{arcs{i}(1)} = [arc_inds{arcs{i}(1)},i];
+        y_verts{arcs{i}(1)} = [y_verts{arcs{i}(1)},arcs{i}(end)];
+        for j=2:length(arcs{i})-1
+            neighbors{arcs{i}(j)} = [arcs{i}(j-1),arcs{i}(j+1)];
+            arc_inds{arcs{i}(j)} = [arc_inds{arcs{i}(j)},i];
+            y_verts{arcs{i}(j)} = [y_verts{arcs{i}(j)},setdiff([arcs{i}(1),arcs{i}(end)],arcs{i}(j))];
+        end
+        arc_inds{arcs{i}(end)} = [arc_inds{arcs{i}(end)},i];
+        y_verts{arcs{i}(end)} = [y_verts{arcs{i}(end)},arcs{i}(1)];
+    end
+
+    num_net_edges = m-length(vert_indices) + length(cell2mat(vert_neighs))/2.0;
+    net_edges = zeros(num_net_edges,2);
+    k = 1;
+    for i=1:m
+        for j=1:length(neighbors{i})
+            if neighbors{i}(j)>i
+                net_edges(k,:) = [i,neighbors{i}(j)];
+                y_net_edge_inds{i} = [y_net_edge_inds{i},k];
+                y_net_edge_inds{neighbors{i}(j)} = [y_net_edge_inds{neighbors{i}(j)},k];
+                k = k + 1;
+            end
+        end
     end
 end

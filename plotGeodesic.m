@@ -14,7 +14,7 @@ if length(i0)>1
 end
 i0 = m+i0;
 rgb_c = [0,.8,0]; ls = '-';
-%figure;
+figure;
 %plotNet(x,y,net_edges,rgb_c,ls)
 plotGraph(x,y,[],edges,weights,lambda,alpha,[],[],rgb_c,ls)
 hold on;
@@ -30,7 +30,7 @@ if ~isempty(j)
     while next(i,j)>0
         i = next(i,j);
         vs = [V(p(k),:);V(i,:)];
-        plot(vs(:,1),vs(:,2),'Color',[0,0,1],'LineWidth',2);
+        plot(vs(:,1),vs(:,2),'Color',[0,0,1],'LineWidth',.5);
         k = k+1;
         p(k) = i;
     end
@@ -43,7 +43,7 @@ else
         while next(i,j)>0
             i = next(i,j);
             vs = [V(p(k),:);V(i,:)];
-            plot(vs(:,1),vs(:,2),'Color',[0,0,1],'LineWidth',2);
+            plot(vs(:,1),vs(:,2),'Color',[0,0,1],'LineWidth',.5);
             k = k+1;
             p(k) = i;
         end

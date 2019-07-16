@@ -3,7 +3,7 @@ function [ y,net_edges ] = rndInitialize(x,k)
 %   Detailed explanation goes here
 
 n = length(x(:,1));
-k = min(k,n/2);
+k = min(k,floor(n/2));
 %x_k = datasample(x,k,'Replace',false)
 ind = union(unidrnd(n,k,1),[]);
 rest_ind = setdiff(1:n,ind);
