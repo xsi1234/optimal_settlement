@@ -474,7 +474,7 @@ end
 
 function Optimize_network9(outer_iter, inner_iter)
     del_r = .1;
-    n_r = 9;
+    n_r = 7;
     x = [0,0];
     for i=1:n_r
         r_i = i*del_r;
@@ -482,7 +482,7 @@ function Optimize_network9(outer_iter, inner_iter)
         thetas = (2*pi/n_ri:2*pi/n_ri:2*pi)'-(pi/n_ri);
         x = [x;r_i*cos(thetas),r_i*sin(thetas)];
     end
-    x=0.4*x;
+    x=0.8*x;
     n = length(x(:,1))
     total_mass=1;
     mass = (total_mass/n)*ones(1,n);

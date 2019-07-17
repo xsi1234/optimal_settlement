@@ -1,14 +1,23 @@
 %Wrapping function for forward Euler Scheme. h = step size, p = kernel
 %dimension. Returns the positions of particles after iter_num iterations.
-function X_res = euler_wrap(X, Y, Adj, M, iter_num, p, h, alpha, theta, sigma, lambda, color_mat)
+function X_res = euler_wrap(X, Y, Adj, M, iter_num, p, h0, alpha, theta, sigma, lambda, color_mat)
     figure();
     hold on;
     plot_network(Y, Adj);
     tic
+    h = h0;
     X_record = [];
+    E_last = inf;
     for i = 1:iter_num
+        if h < h0*0.001
+            break
+        end
         [E,grad,X] = euler_iter(X, M, Y, Adj, h, p, theta, alpha,sigma,lambda);
         fprintf(['\n iter = %d   E = %.8f'],i,E);
+        if E > E_last
+            h = h * 1/2;
+        end
+        E_last = E;
         if mod(i, ceil(iter_num/20)) == 0%We allow at most 20 traces per point to appear on the plot, making it less messy
             X_record = [X_record', X']';
         end
