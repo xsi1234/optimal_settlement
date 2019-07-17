@@ -76,7 +76,7 @@ function U=nextstep_E2(X, l, k, M, p, K_mat,sigma)
             K_grad_kth(i, :) = computeKgrad(X(k, :)-X(i, :),sigma);
         end
     end
-    u_component_1 = M * K_grad_kth .* K_mat(k);
+    u_component_1 = M * K_grad_kth .* (K_mat(k));
     M_1 = M .* K_mat;
     u_component_2 = M_1 * K_grad_kth;
     U = -(p-1)*(u_component_1+u_component_2);
@@ -166,8 +166,15 @@ end
 function [E,grad,X_new] = euler_iter(X, M, Y, Adj, h, p, theta, alpha,sigma, lambda)
     l = size(X,1);
     X_new = zeros(size(X));
-    K_mat = arrayfun(@(i) computeK(X(ceil(i/l),:)-X(mod(i,l)+1,:), sigma), 1:l*l);
-    K_mat = reshape(K_mat, [l,l]);
+%     K_mat = arrayfun(@(i) computeK(X(mod(i,l)+1,:)-X(ceil(i/l),:), sigma), 1:l*l);
+%     K_mat = reshape(K_mat, [l,l]);
+%     K_mat
+    K_mat = zeros(l);
+    for i = 1:l
+        for j = 1:l
+            K_mat(i,j) = computeK(X(i, :) - X(j, :), sigma);
+        end
+    end
     K_mat_1 = (M * K_mat).^(p-2);
     ly = size(Y, 1);
     XY_union = cat(1, Y, X);
@@ -177,6 +184,7 @@ function [E,grad,X_new] = euler_iter(X, M, Y, Adj, h, p, theta, alpha,sigma, lam
     D_mat = D_mat - mask .* D_mat;
     [dists, next] = floyd1(D_mat);
     for i = 1:l
+        %theta*nextstep_E2(X, l, i, M, p, K_mat_1,sigma)
         X_new(i,:) = X(i,:)+h*(nextstep_E1(l, ly, XY_union, next, i, M, alpha)+theta*nextstep_E2(X, l, i, M, p, K_mat_1,sigma));
     end
     grad = X_new - X;
