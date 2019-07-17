@@ -474,7 +474,7 @@ end
 
 function Optimize_network9(outer_iter, inner_iter)
     del_r = .1;
-    n_r = 5;
+    n_r = 9;
     x = [0,0];
     for i=1:n_r
         r_i = i*del_r;
