@@ -26,6 +26,7 @@ function X_res = euler_wrap(X, Y, Adj, M, iter_num, p, h0, alpha, theta, sigma, 
     X_res = X;
     plot_particles(X, X_record, color_mat);
     plot_grad(X, grad, color_mat);
+    drawnow;
 end
 %Plotting functions
 function plot_grad(X, grad, color_mat)

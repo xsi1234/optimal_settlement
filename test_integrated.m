@@ -839,9 +839,15 @@ function maximize_subroutine(y0,cut_indices0,net_edges0,vert_indices,vert_neighs
     for j = 1:outer_iter
         fprintf('\n outer iter = %d', j);
         tic
-        if isempty(net_edges0)                                                         % SK
-            net_edges0 = getNetEdges(vert_indices,vert_neighs,arcs,length(y0(:,1)));   %
-        end                                                                            %
+        if isempty(net_edges)                                                         % SK
+            net_edges = getNetEdges(vert_indices,vert_neighs,arcs,length(y0(:,1)));   %
+        end
+        X_mat = squareform(pdist(x));
+        for i = 1:size(X_mat,1)
+            X_mat(i,i) = inf;
+        end
+        avg_min_dist = mean(min(X_mat));
+        %[y, net_edges] = piecewise_network(y, net_edges, avg_min_dist);
         [y,net_edges,~,~,~,~,~,~] = onut(y,net_edges,x,mass,lambda1,alpha,...        
             tol,rho0,max_m,max_avg_turn,normalize_data,pause_bool,delta,max_e_leng);   % SK
         toc
@@ -859,6 +865,8 @@ function maximize_subroutine(y0,cut_indices0,net_edges0,vert_indices,vert_neighs
         x = euler_wrap(x, y, Adj, mass, inner_iter, p, h, alpha_2, theta, sigma, lambda1, color_mat);
     end
 end
+%function [y'piecewise_network(Y, net_edges, min_dist)
+    
 function plot_network (Y, Adj)
 %     for i = 1:size(X,1)
 %         plot(X(i,1), X(i,2),'marker','o','markersize', 8,'color',color_mat(i,:));
