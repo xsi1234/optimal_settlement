@@ -7,7 +7,7 @@ function E = calculateEnergyTotal(y, Adj, dist_mat, K_mat, theta, lambda, p, M)
     Adj = triu(Adj); 
     network_cost = Adj .* squareform(pdist(y));
     E1 = sum(sum(network_cost));
-    E2 = sum(sum(dist_mat)) * (total_mass/n)^2;
+    E2 = sum(sum(dist_mat .* repmat(M, n, 1) .* repmat(M', 1, n)));
     E3 = ((M * K_mat) .^ (p-1))*M';
     fprintf(['  E1 = %.4f   E2 = %.4f    E3 = %.4f'],lambda*E1,E2, theta*E3);
     E = lambda * E1 + E2 + theta * E3;
