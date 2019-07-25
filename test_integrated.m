@@ -850,6 +850,8 @@ function maximize_subroutine(y0,cut_indices0,net_edges0,vert_indices,vert_neighs
         [y,net_edges,~,~,~,~,~,~] = onut(y,net_edges,x,mass,lambda1,alpha,...        
             tol,rho0,max_m,max_avg_turn,normalize_data,pause_bool,delta,max_e_leng);   % SK
         toc
+        y2 = y;
+        net_edges2 = net_edges;
         [y2, net_edges2] = piecewise_network(y, net_edges, avg_min_dist);
         p = 3;
         h = 0.005;
@@ -867,19 +869,21 @@ function maximize_subroutine(y0,cut_indices0,net_edges0,vert_indices,vert_neighs
 end
 function [Y2, net_edges2] = piecewise_network(Y, net_edges, min_dist)
     Y2 = Y;
-    net_edges2 = net_edges;
+    net_edges2 = [];
     for i = 1:size(net_edges,1)
         d_i = Y(net_edges(i,1),:) - Y(net_edges(i,2),:);
         if norm(d_i)> min_dist
             seg_num =  ceil(norm(d_i) / min_dist);
             pred_vertex = net_edges(i,1);
             for j = 1:seg_num-1
-               Y2 = [Y2; Y(net_edges(i,1),:) + d_i * j / seg_num];
+               Y2 = [Y2; Y(net_edges(i,1),:) - d_i * j / seg_num];
                curr_vertex = size(Y2,1);
                net_edges2 = [net_edges2; pred_vertex curr_vertex];
                pred_vertex = curr_vertex;
             end
             net_edges2 = [net_edges2; pred_vertex net_edges(i,2)];
+        else
+            net_edges2 = [net_edges2; net_edges(i,1) net_edges(i,2)];
         end
     end
 end
