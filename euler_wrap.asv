@@ -8,16 +8,17 @@ function X_res = euler_wrap(X, Y, Adj, M, iter_num, p, h0, alpha, theta, sigma, 
     h = h0;
     X_record = [];
     E_last = inf;
+    min_step = 0.001;%minimum current_step_size/initial_step_size
     for i = 1:iter_num
-        if h < h0*0.001
+        if h < h0*min_step
             break
         end
-        [E,grad,X_new] = euler_iter(X, M, Y, Adj, h, p, theta, alpha,sigma,lambda);
+        [E,grad,X] = euler_iter(X, M, Y, Adj, h, p, theta, alpha,sigma,lambda);
         fprintf(['\n iter = %d   E = %.8f'],i,E);
         if E > E_last
             h = h * 1/2;
         else
-            X = X_new;
+            
         end
         E_last = E;
         if mod(i, ceil(iter_num/20)) == 0%We allow at most 20 traces per point to appear on the plot, making it less messy

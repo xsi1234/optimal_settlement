@@ -14,7 +14,7 @@
 % p: power of convolution term
 % n: size of the set of masses
 % n_r: number of circles of points around (0,0)
-function test_integrated(test_case, outer_iter_num, inner_iter_num)
+function test_integrated_fixednet(test_case, outer_iter_num, inner_iter_num)
     if test_case == 0
         Optimize_network(outer_iter_num, inner_iter_num);
     elseif test_case == 2
@@ -134,8 +134,8 @@ end
     
 function Optimize_network2(outer_iter, inner_iter)
     rng(2);
-    n = 3*80;
-    m = 60;
+    n = 3*20;
+    m = 30;
 
     x1(:,1) = -sqrt(2):sqrt(2)/(n/3-1):0;
     x1(:,2) = zeros(n/3,1);
@@ -828,27 +828,28 @@ function maximize_subroutine(y0,cut_indices0,net_edges0,vert_indices,vert_neighs
         axis equal;
         drawnow;
     %   avg_min_dist = mean(min(X_mat));
-        [y,net_edges,~,~,~,~,~,~] = onut(y,net_edges,x,mass,lambda1,alpha,...        
-            tol,rho0,max_m,max_avg_turn,normalize_data,pause_bool,delta,max_e_leng);   % SK
-        toc
-      %  y2 = y;
-      %  net_edges2 = net_edges;
-     %  Dejan erased the call to this routine
-     %  [y2, net_edges2] = piecewise_network(y, net_edges, avg_min_dist);
-        Adj = zeros(size(y,1));
-        for i = 1:size(net_edges, 1)
-            Adj(net_edges(i,1), net_edges(i,2)) = 1;
-        end
-        Adj = or(Adj, Adj');
-        figure(2*j);
-        hold on;
-        plot_network(y, Adj); 
-        plot_particles(x, color_mat);
-        axis equal;
-        drawnow;
+%         [y,net_edges,~,~,~,~,~,~] = onut(y,net_edges,x,mass,lambda1,alpha,...        
+%             tol,rho0,max_m,max_avg_turn,normalize_data,pause_bool,delta,max_e_leng);   % SK
+%         toc
+%       %  y2 = y;
+%       %  net_edges2 = net_edges;
+%      %  Dejan erased the call to this routine
+%      %  [y2, net_edges2] = piecewise_network(y, net_edges, avg_min_dist);
+%         Adj = zeros(size(y,1));
+%         for i = 1:size(net_edges, 1)
+%             Adj(net_edges(i,1), net_edges(i,2)) = 1;
+%         end
+%         Adj = or(Adj, Adj');
+%         figure(2*j);
+%         hold on;
+%         plot_network(y, Adj); 
+%         plot_particles(x, color_mat);
+%         axis equal;
+%         drawnow;
         x = euler_wrap(x, y, Adj, mass, inner_iter, p, h, alpha_2, theta, sigma, lambda1, color_mat);
     end
 end
+
 function [Y2, net_edges2] = piecewise_network(Y, net_edges, min_dist)
     Y2 = Y;
     net_edges2 = [];
@@ -889,7 +890,7 @@ function plot_particles(X, color_mat)
 %         plot(X_record(i,1), X_record(i,2), 'marker','.','color', color_mat(mod(i-1,size(X,1))+1,:));
 %     end
     for i = 1:size(X,1)
-        plot(X(i,1), X(i,2),'marker','o','markersize',5, 'color',color_mat(i,:));
+        plot(X(i,1), X(i,2),'marker','o','markersize',8, 'color',color_mat(i,:));
     end
 end
 
