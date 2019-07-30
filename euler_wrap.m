@@ -131,21 +131,21 @@ function V = nextstep_E1(lx, ly, XY_union, next, k, M, alpha)
     D_grad_kth = zeros(lx, 2);
     xk = XY_union(ly+k,:);
     for i = 1:lx
-        next_i = next(ly+k, ly+i);
+        next_i = next(ly+k, ly+i);%index of z1
         if next_i ~= 0
             flag = 0;
-            zi = XY_union(next_i, :);
-            next_2 = next(next_i, ly+i);
+            zi = XY_union(next_i, :);%access z1
+            next_2 = next(next_i, ly+i);%index of z2
             if next_2 > 0 && next_2 <= ly && next_i <=ly
-                z2 = XY_union(next_2, :);
+                z2 = XY_union(next_2, :);%access z2
                 v1 = xk - zi;
                 v2 = zi - z2;
-                beta = acosd(dot(v1,v2)/(norm(v1)*norm(v2)));
+                beta = acosd(dot(v1,v2)/(norm(v1)*norm(v2)));%compute angle between v1 and v2
                 theta = acosd(alpha);
                 if beta > theta
-                    v = -(z2-zi)/norm(z2-zi);
-                    xp = dot(xk-zi,v)*v+zi; 
-                    wi = xp + v * min(norm(xk - xp) * cot(theta), norm(z2 - xp));
+                    v = -(z2-zi)/norm(z2-zi);%normalized vector from z2 to zi
+                    xp = dot(xk-zi,v)*v+zi; %projection of xk onto the vector;
+                    wi = xp + v * min(norm(xk - xp) * cot(theta), norm(z2 - xp));%compute the "should be there“ station
                     D_grad_kth(i,:) = (xk - wi) / norm(wi - xk);
                     flag = 1;
                 end
