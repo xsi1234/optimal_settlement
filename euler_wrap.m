@@ -142,7 +142,7 @@ function V = nextstep_E1(lx, ly, XY_union, next, k, M, alpha)
                 v2 = zi - z2;
                 beta = acosd(dot(v1,v2)/(norm(v1)*norm(v2)));%compute angle between v1 and v2
                 theta = acosd(alpha);
-                if beta > theta
+                if beta < theta
                     v = -(z2-zi)/norm(z2-zi);%normalized vector from z2 to zi
                     xp = dot(xk-zi,v)*v+zi; %projection of xk onto the vector;
                     wi = xp + v * min(norm(xk - xp) * cot(theta), norm(z2 - xp));%compute the "should be there? station
