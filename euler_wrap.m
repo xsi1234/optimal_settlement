@@ -145,7 +145,7 @@ function V = nextstep_E1(lx, ly, XY_union, next, k, M, alpha)
                 if beta > theta
                     v = -(z2-zi)/norm(z2-zi);%normalized vector from z2 to zi
                     xp = dot(xk-zi,v)*v+zi; %projection of xk onto the vector;
-                    wi = xp + v * min(norm(xk - xp) * cot(theta), norm(z2 - xp));%compute the "should be there“ station
+                    wi = xp + v * min(norm(xk - xp) * cot(theta), norm(z2 - xp));%compute the "should be there? station
                     D_grad_kth(i,:) = (xk - wi) / norm(wi - xk);
                     flag = 1;
                 end
@@ -192,6 +192,28 @@ function [E,grad,X_new] = euler_iter(X, M, Y, Adj, h, p, theta, alpha,sigma, lam
     mask = Adj*(1-alpha);
     mask(l+ly, l+ly) = 0;
     D_mat = D_mat - mask .* D_mat;
+    for k = 1:ly
+        for j = 1:ly
+            if Adj(k,j) == 1
+                yk = Y(k,:);
+                yj = Y(j,:);
+                for i= 1:l
+                   xi = X(i, :);
+                   beta = acos(dot(xi-yk, yj-yk)/(norm(xi-yk)*norm(yj-yk)));
+                   gamma = acos(dot(xi-yj, yk-yj)/(norm(xi-yj)*norm(yj-yk)));
+                   if beta < theta && gamma < pi - theta
+                        v1 = xi - yk;
+                        v2 = yk - yj;
+                        v = -(yj-yk)/norm(yj-yk);%normalized vector from z2 to zi
+                        xp = dot(xi-yk,v)*v+yk; %projection of xk onto the vector;
+                        px = xp + v * norm(xi - xp) * cot(theta);
+                        d = norm(xi-px) + alpha * norm(px-yk);
+                        D_mat(ly+i, k) = d;
+                   end
+                end    
+            end
+        end
+    end
     [dists, next] = floyd1(D_mat);
     for i = 1:l
         %theta*nextstep_E2(X, l, i, M, p, K_mat_1,sigma)

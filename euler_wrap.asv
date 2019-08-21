@@ -1,24 +1,21 @@
 %Wrapping function for forward Euler Scheme. h = step size, p = kernel
 %dimension. Returns the positions of particles after iter_num iterations.
 function X_res = euler_wrap(X, Y, Adj, M, iter_num, p, h0, alpha, theta, sigma, lambda, color_mat)
-    figure();
-    hold on;
-    plot_network(Y, Adj);
+ %   figure();
+ %   hold on;
+ %   plot_network(Y, Adj);
     tic
     h = h0;
     X_record = [];
     E_last = inf;
-    min_step = 0.001;%minimum current_step_size/initial_step_size
     for i = 1:iter_num
-        if h < h0*min_step
+        if h < h0*0.001
             break
         end
         [E,grad,X] = euler_iter(X, M, Y, Adj, h, p, theta, alpha,sigma,lambda);
         fprintf(['\n iter = %d   E = %.8f'],i,E);
         if E > E_last
             h = h * 1/2;
-        else
-            
         end
         E_last = E;
         if mod(i, ceil(iter_num/20)) == 0%We allow at most 20 traces per point to appear on the plot, making it less messy
@@ -27,9 +24,9 @@ function X_res = euler_wrap(X, Y, Adj, M, iter_num, p, h0, alpha, theta, sigma, 
     end
     toc
     X_res = X;
-    plot_particles(X, X_record, color_mat);
-    plot_grad(X, grad, color_mat);
-    drawnow;
+%    plot_particles(X, X_record, color_mat);
+%    plot_grad(X, grad, color_mat);
+%    drawnow;
 end
 %Plotting functions
 function plot_grad(X, grad, color_mat)
@@ -134,21 +131,21 @@ function V = nextstep_E1(lx, ly, XY_union, next, k, M, alpha)
     D_grad_kth = zeros(lx, 2);
     xk = XY_union(ly+k,:);
     for i = 1:lx
-        next_i = next(ly+k, ly+i);
+        next_i = next(ly+k, ly+i);%index of z1
         if next_i ~= 0
             flag = 0;
-            zi = XY_union(next_i, :);
-            next_2 = next(next_i, ly+i);
+            zi = XY_union(next_i, :);%access z1
+            next_2 = next(next_i, ly+i);%index of z2
             if next_2 > 0 && next_2 <= ly && next_i <=ly
-                z2 = XY_union(next_2, :);
+                z2 = XY_union(next_2, :);%access z2
                 v1 = xk - zi;
                 v2 = zi - z2;
-                beta = acosd(dot(v1,v2)/(norm(v1)*norm(v2)));
+                beta = acosd(dot(v1,v2)/(norm(v1)*norm(v2)));%compute angle between v1 and v2
                 theta = acosd(alpha);
                 if beta > theta
-                    v = -(z2-zi)/norm(z2-zi);
-                    xp = dot(xk-zi,v)*v+zi; 
-                    wi = xp + v * min(norm(xk - xp) * cot(theta), norm(z2 - xp));
+                    v = -(z2-zi)/norm(z2-zi);%normalized vector from z2 to zi
+                    xp = dot(xk-zi,v)*v+zi; %projection of xk onto the vector;
+                    wi = xp + v * min(norm(xk - xp) * cot(theta), norm(z2 - xp));%compute the "should be there? station
                     D_grad_kth(i,:) = (xk - wi) / norm(wi - xk);
                     flag = 1;
                 end
@@ -195,6 +192,26 @@ function [E,grad,X_new] = euler_iter(X, M, Y, Adj, h, p, theta, alpha,sigma, lam
     mask = Adj*(1-alpha);
     mask(l+ly, l+ly) = 0;
     D_mat = D_mat - mask .* D_mat;
+    for k = 1:ly
+        for j = 1:ly
+            if Adj(k,j) == 1
+                yk = Y(k,:);
+                yj = Y(j,:);
+                for i= 1:l
+                   xi = X(i, :);
+                   beta = acos(cdot(xi-yk, yj-yk)/(norm(xi-yk)*norm(yj-yk)));
+                   gamma = acos(cdot(xi-yj, yk-yj)/(norm(xi-yj)*norm(yj-yk)));
+                   if beta < theta && gamma < pi - theta
+                        v1 = xi - yk;
+                        v2 = yk - yj;
+                        v = -(yj-yk)/norm(yj-yk);%normalized vector from z2 to zi
+                        xp = dot(xi-yk,v)*v+yk; %projection of xk onto the vector;
+                        wi = xp + v * min(norm(xk - xp) * cot(theta), norm(z2 - xp));
+                   end
+                end    
+            end
+        end
+    end
     [dists, next] = floyd1(D_mat);
     for i = 1:l
         %theta*nextstep_E2(X, l, i, M, p, K_mat_1,sigma)
