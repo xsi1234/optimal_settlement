@@ -222,7 +222,7 @@ function [E,grad,X_new] = euler_iter(X, M, Y, Adj, h, p, theta, alpha,sigma, lam
         X_new(i,:) = X(i,:)+h*(nextstep_E1(l, ly, XY_union, next, i, M, alpha)+theta*nextstep_E2(X, l, i, M, p, K_mat_1,sigma));
     end
     grad = X_new - X;
-    E = calculateEnergyTotal(Y, Adj, dists(ly+1:l+ly, ly+1:ly+l), old_dists(ly+1:l+ly, ly+1:ly+l), K_mat, theta, lambda, p, M);
+    E = calculateEnergyTotal(Y, Adj, dists(ly+1:l+ly, ly+1:ly+l),dists(ly+1:l+ly, ly+1:ly+l) K_mat, theta, lambda, p, M);
     %grad = grad / norm(grad);
     %step_len = sum(vecnorm(X_new-X))/h;
     %step_len

@@ -5,6 +5,6 @@ function [ energy ] = calculateEnergy( y,x,edges,edge_costs )
 v = [y;x];
 dists = sqrt(sum((v(edges(:,1),:) - v(edges(:,2),:)).^2,2));
 energy = dists' * edge_costs;
-
+size(edge_costs)
 end
 
