@@ -140,12 +140,13 @@ function V = nextstep_E1(lx, ly, XY_union, next, k, M, alpha)
                 z2 = XY_union(next_2, :);%access z2
                 v1 = xk - zi;
                 v2 = zi - z2;
-                beta = acosd(dot(v1,v2)/(norm(v1)*norm(v2)));%compute angle between v1 and v2
-                theta = acosd(alpha);
-                if beta < theta
+                beta = acos(dot(-v1,v2)/(norm(v1)*norm(v2)));%compute angle between v1 and v2¡¢
+                gamma = acos(dot(xk-z2, v2)/norm(xk-z2)*norm(v2));
+                theta = acos(alpha);
+                if beta < theta && gamma < pi-theta
                     v = -(z2-zi)/norm(z2-zi);%normalized vector from z2 to zi
                     xp = dot(xk-zi,v)*v+zi; %projection of xk onto the vector;
-                    wi = xp + v * min(norm(xk - xp) * cot(theta), norm(z2 - xp));%compute the "should be there? station
+                    wi = xp + v * norm(xk - xp) * cot(theta);%compute the "should be there? station
                     D_grad_kth(i,:) = (xk - wi) / norm(wi - xk);
                     flag = 1;
                 end
@@ -222,7 +223,7 @@ function [E,grad,X_new] = euler_iter(X, M, Y, Adj, h, p, theta, alpha,sigma, lam
         X_new(i,:) = X(i,:)+h*(nextstep_E1(l, ly, XY_union, next, i, M, alpha)+theta*nextstep_E2(X, l, i, M, p, K_mat_1,sigma));
     end
     grad = X_new - X;
-    E = calculateEnergyTotal(Y, Adj, dists(ly+1:l+ly, ly+1:ly+l),dists(ly+1:l+ly, ly+1:ly+l) K_mat, theta, lambda, p, M);
+    E = calculateEnergyTotal(Y, Adj, dists(ly+1:l+ly, ly+1:ly+l), old_dists(ly+1:l+ly, ly+1:ly+l), K_mat, theta, lambda, p, M);
     %grad = grad / norm(grad);
     %step_len = sum(vecnorm(X_new-X))/h;
     %step_len
