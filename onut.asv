@@ -89,8 +89,7 @@ energy_1
 %fprintf(['\n iter = %d       E = %8.',num2str(num_d),'E'],iter,energy);
 
 while energy_prev-energy>tol*energy || energy0-energy>tol*energy || energy0<energy || energy_prev<energy || ~check_top || top_change || n_add>0
-    energy_1 = calculateEnergyNew(y,x, net_edges, mass, alpha, 0.5);
-    energy_1
+    
     energy_prev = energy;
     iter = iter + 1;
     inner_iter = 0;

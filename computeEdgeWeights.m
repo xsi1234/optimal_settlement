@@ -126,6 +126,7 @@ if check_top && e_heur
             N_new = N + n_new_p;
             [edges_new,edge_costs_new,edge_weights_new,net_edges_new,dists_new,next_new] = getCostsWeights(y_new,N_new,dist_mat_new,net_edges_new,mass,alpha,lambda,0);
             energy_new = calculateEnergy(y_new,x,edges_new,edge_costs_new);
+            fprintf('new energy %.8f', energy_new);
             %display(y([i,j],:))
             if energy_new<energy
                 edges=edges_new; edge_costs=edge_costs_new; edge_weights=edge_weights_new; net_edges=net_edges_new; dists=dists_new; next = next_new;

@@ -13,7 +13,6 @@ function X_res = euler_wrap(X, Y, Adj, M, iter_num, p, h0, alpha, theta, sigma, 
             break
         end
         [E,grad,X] = euler_iter(X, M, Y, Adj, h, p, theta, alpha,sigma,lambda);
-        fprintf(['\n iter = %d   E = %.8f'],i,E);
         if E > E_last
             h = h * 1/2;
         end
