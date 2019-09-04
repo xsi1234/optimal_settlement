@@ -104,7 +104,7 @@ while energy_prev-energy>tol*energy || energy0-energy>tol*energy || energy0<ener
         energy0 = calculateEnergy(y_new,x,edges,edge_costs);
         energy01 = calculateEnergyOld(y_new,x, net_edges, mass, alpha_2, theta, lambda);
         energy_1 = calculateEnergyNew(y_new,x, net_edges, mass, alpha_2, theta, lambda);
-        fprintf('Old energy0: %f, %f\n', energy0, energy01);
+        fprintf('Old energy: %f, %f\n', energy0, energy01);
         %figure(fig1); plotNet(x,y,net_edges,rgb_c,ls); drawnow;
         %figure(fig2); plotGraph(x,y_new,edges,edge_weights,lambda,alpha,20,mass,rgb_c,ls); drawnow;
         inner_iter = inner_iter + 1;
