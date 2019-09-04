@@ -39,7 +39,7 @@ function E = calculateEnergyNew(Y,X, net_edges,M, alpha, theta, lambda)
     E1 = sum(sum(dists .* repmat(M, l, 1) .* repmat(M', 1, l)));
     E2 = sum(sum(Adj .* squareform(pdist(Y))))/2;
     E = lambda*E2 + E1;
-    fprintf(['lambda = %f E =%.6f   E1 = %.4f   E2 = %.4f\n'],lambda, E, lambda*E2, E1);
+    fprintf(['E =%.6f   E1 = %.4f   E2 = %.4f\n'],E, lambda*E2, E1);
 end    
     
     

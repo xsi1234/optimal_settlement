@@ -18,11 +18,9 @@ function test_integrated(test_case, outer_iter_num, inner_iter_num)
     if test_case == 0
         Optimize_network(outer_iter_num, inner_iter_num);
     elseif test_case == 21
-        Optimize_network21(outer_iter_num, inner_iter_num);
-    elseif test_case == 13
-        Optimize_network13(outer_iter_num, inner_iter_num);
-    elseif test_case == 14
-        Optimize_network14(outer_iter_num, inner_iter_num);
+        Optimize_network2(outer_iter_num, inner_iter_num);
+    elseif test_case == 12
+        Optimize_network12(outer_iter_num, inner_iter_num);
     elseif test_case == 4
         Optimize_network4(outer_iter_num, inner_iter_num);
     elseif test_case == 5
@@ -180,7 +178,7 @@ function Optimize_network21(outer_iter, inner_iter)
 end
 
 
-function Optimize_network13(outer_iter, inner_iter)
+function Optimize_network12(outer_iter, inner_iter)
     del_r = 0.1;
     n_r = 5;
     x = [0,0];
@@ -190,6 +188,7 @@ function Optimize_network13(outer_iter, inner_iter)
         thetas = (2*pi/n_ri:2*pi/n_ri:2*pi)'-(pi/n_ri);
         x = [x;r_i*cos(thetas),r_i*sin(thetas)];
     end
+    x=0.6*x;
     n = length(x(:,1));
     total_mass = 1;
     mass = total_mass/n*ones(1,n);
@@ -221,8 +220,6 @@ function Optimize_network13(outer_iter, inner_iter)
     maximize_subroutine(y0,cut_indices0,net_edges0,vert_indices,vert_neighs,arcs,x,mass,lambda1,alpha,tol,rho0,...
         max_m,max_avg_turn,normalize_data,pause_bool,delta,max_e_leng,outer_iter,inner_iter, theta, alpha_2, sigma, n);;
 end
-
-
 
 function Optimize_network3(outer_iter, inner_iter)
     rng(2);
@@ -600,7 +597,7 @@ end
 
 function Optimize_network93(outer_iter, inner_iter)
     del_r = .1;
-    n_r = 6;
+    n_r = 9;
     x = [0,0];
     for i=1:n_r
         r_i = i*del_r;
@@ -619,7 +616,7 @@ function Optimize_network93(outer_iter, inner_iter)
 %     y0(:,2) = zeros(m/3,1);
 %     y0 = [y0;zeros(m/3,1),(1/(m/3):1/(m/3):1)';zeros(m/3,1),-(1/(m/3):1/(m/3):1)'];
 %     y0=0.4*y0;
-    x=0.5*x;
+      x=0.3*x;
     thetas = (2*pi/3:2*pi/3:2*pi);
     b_len = .2;
     y0=[0,0]; net_edges0 = [];

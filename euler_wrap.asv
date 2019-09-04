@@ -17,7 +17,7 @@ function X_res = euler_wrap(X, Y, Adj, M, iter_num, p, h0, alpha, theta, sigma, 
             h = h * 1/2;
         end
         E_last = E;
-        X = X + h*(rand(size(X))-0.5)*0.1;
+        X = X + rand(size(
         if mod(i, ceil(iter_num/20)) == 0%We allow at most 20 traces per point to appear on the plot, making it less messy
             X_record = [X_record', X']';
         end
