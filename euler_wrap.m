@@ -13,6 +13,7 @@ function X_res = euler_wrap(X, Y, Adj, M, iter_num, p, h0, alpha, theta, sigma, 
             break
         end
         [E,grad,X] = euler_iter(X, M, Y, Adj, h, p, theta, alpha,sigma,lambda);
+        %energy_1 = calculateEnergyNew(Y,X,net_edges,M,alpha,theta,lambda);
         if E > E_last
             h = h * 1/2;
         end
@@ -203,7 +204,8 @@ function [E,grad,X_new] = euler_iter(X, M, Y, Adj, h, p, theta, alpha,sigma, lam
                    xi = X(i, :);
                    beta = acos(dot(xi-yk, yj-yk)/(norm(xi-yk)*norm(yj-yk)));
                    gamma = acos(dot(xi-yj, yk-yj)/(norm(xi-yj)*norm(yj-yk)));
-                   if beta < theta && gamma < pi - theta
+                   theta1 = acos(alpha);
+                   if beta < theta1 && gamma < pi - theta1
                         v1 = xi - yk;
                         v2 = yk - yj;
                         v = -(yj-yk)/norm(yj-yk);%normalized vector from z2 to zi

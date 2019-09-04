@@ -136,7 +136,7 @@ function Optimize_network(outer_iter, inner_iter)
             max_m,max_avg_turn,normalize_data,pause_bool,delta,max_e_leng,outer_iter,inner_iter, theta, alpha_2, sigma, n);;
 end
     
-function Optimize_network21(outer_iter, inner_iter)
+function Optimize_network21(outer_iter, inner_iter)%
     rng(2);
     n = 3*80;
     m = 60;

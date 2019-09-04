@@ -19,9 +19,10 @@ function E = calculateEnergyNew(Y,X, net_edges,M, alpha, theta, lambda)
                 yj = Y(j,:);
                 for i= 1:l
                    xi = X(i, :);
+                   theta1 = acos(alpha);
                    beta = acos(dot(xi-yk, yj-yk)/(norm(xi-yk)*norm(yj-yk)));
                    gamma = acos(dot(xi-yj, yk-yj)/(norm(xi-yj)*norm(yj-yk)));
-                   if beta < theta && gamma < pi - theta
+                   if beta < theta1 && gamma < pi - theta1
                         v1 = xi - yk;
                         v2 = yk - yj;
                         v = -(yj-yk)/norm(yj-yk);%normalized vector from z2 to zi
