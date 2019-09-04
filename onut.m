@@ -156,7 +156,7 @@ while energy_prev-energy>tol*energy || energy0-energy>tol*energy || energy0<ener
     
     [edges,edge_costs,edge_weights,net_edges,y_net_edge_inds,neighbors,y,z,b,next,top_change,dists] = computeEdgeWeights(y,x,alpha,lambda,net_edges,mass,check_top,e_heur,delta);
     energy = calculateEnergy(y,x,edges,edge_costs);
-    energy_1 = calculateEnergyNew(y,x, net_edges, mass, alpha_2, theta, lambda);
+    energy_1 = calculateEnergyNew(y,x, net_edges, mass, alpha_2, theta, lambda);%In each place of calculating E, we add a calculation of E in the new version
     if energy0-energy < 10*tol*energy
         more_prec = 1;
     end
