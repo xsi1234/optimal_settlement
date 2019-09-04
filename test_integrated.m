@@ -828,7 +828,7 @@ function maximize_subroutine(y0,cut_indices0,net_edges0,vert_indices,vert_neighs
         axis equal;
         drawnow;
     %   avg_min_dist = mean(min(X_mat));
-        [y,net_edges,~,~,~,~,~,~] = onut(y,net_edges,x,mass,lambda1,alpha,...        
+        [y,net_edges,~,~,~,~,~,~] = onut(y,net_edges,x,mass,lambda1,alpha,alpha_2,theta,...        
             tol,rho0,max_m,max_avg_turn,normalize_data,pause_bool,delta,max_e_leng);   % SK
         toc
       %  y2 = y;
@@ -846,7 +846,7 @@ function maximize_subroutine(y0,cut_indices0,net_edges0,vert_indices,vert_neighs
         plot_particles(x, color_mat);
         axis equal;
         drawnow;
-        x = euler_wrap(x, y, Adj, mass, inner_iter, p, h, alpha_2, theta, sigma, lambda1, color_mat);
+        x = euler_wrap(x, y, Adj, mass, inner_iter, p, h, alpha_2, theta, sigma, lambda1, color_mat,net_edges);
     end
 end
 function [Y2, net_edges2] = piecewise_network(Y, net_edges, min_dist)

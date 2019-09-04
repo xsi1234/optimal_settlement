@@ -1,4 +1,4 @@
-function [y,net_edges,edges,edge_weights,iter,energy,dists,next] = onut(y0,net_edges0,x,mass,lambda,alpha,...
+function [y,net_edges,edges,edge_weights,iter,energy,dists,next] = onut(y0,net_edges0,x,mass,lambda,alpha,alpha_2,theta,...
     tol,rho0,max_m,max_avg_turn,normalize_data,plot_bool,delta,max_leng)
 %ONUT computes optimal network for universal transport
 %   This function computes approximate local minimizers to the universal
@@ -81,16 +81,14 @@ iter = 0; check_top = 0; e_heur = 0; more_prec = 0; n_add = 1;
 %pause;
 [edges,edge_costs,edge_weights,net_edges,y_net_edge_inds,neighbors,y,z,b,next,top_change,dists] = computeEdgeWeights(y,x,alpha,lambda,net_edges0,mass,check_top,e_heur,delta);
 energy = calculateEnergy(y,x,edges,edge_costs);
-energy_1 = calculateEnergyNew(y,x, net_edges, mass, alpha, 0.5);
-energy_1
+energy_1 = calculateEnergyNew(y,x, net_edges, mass, alpha_2, theta, lambda);
 %fig2 = figure;
 %plotGraph(x,y,edges,edge_weights,lambda,alpha,20,mass,rgb_c,ls);
 %energy0 = energy; %will be energy after ADMM
 %fprintf(['\n iter = %d       E = %8.',num2str(num_d),'E'],iter,energy);
 
 while energy_prev-energy>tol*energy || energy0-energy>tol*energy || energy0<energy || energy_prev<energy || ~check_top || top_change || n_add>0
-    energy_1 = calculateEnergyNew(y,x, net_edges, mass, alpha, 0.5);
-    energy_1
+    energy_1 = calculateEnergyNew(y,x, net_edges, mass, alpha_2, theta, lambda);
     energy_prev = energy;
     iter = iter + 1;
     inner_iter = 0;
@@ -158,6 +156,7 @@ while energy_prev-energy>tol*energy || energy0-energy>tol*energy || energy0<ener
     
     [edges,edge_costs,edge_weights,net_edges,y_net_edge_inds,neighbors,y,z,b,next,top_change,dists] = computeEdgeWeights(y,x,alpha,lambda,net_edges,mass,check_top,e_heur,delta);
     energy = calculateEnergy(y,x,edges,edge_costs);
+    energy_1 = calculateEnergyNew(y,x, net_edges, mass, alpha_2, theta, lambda);
     if energy0-energy < 10*tol*energy
         more_prec = 1;
     end
@@ -173,6 +172,7 @@ while energy_prev-energy>tol*energy || energy0-energy>tol*energy || energy0<ener
         [y,z,b,net_edges] = modifySpacingAllComps(y,r,top_struct,n_add,max_m,eo,1,FIX_ENDPTS);
         [edges,edge_costs,edge_weights,net_edges,~,neighbors,y,z,b,next,top_change,dists] = computeEdgeWeights(y,x,alpha,lambda,net_edges,mass,check_top,e_heur,delta);
         energy = calculateEnergy(y,x,edges,edge_costs);
+        energy_1 = calculateEnergyNew(y,x, net_edges, mass, alpha_2, theta, lambda);
         %fprintf(['\n       E = %8.',num2str(num_d),'E      m = %d'],energy,length(y(:,1)));
     end
     if plot_bool
