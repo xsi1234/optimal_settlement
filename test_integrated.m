@@ -133,7 +133,7 @@ function Optimize_network(outer_iter, inner_iter)
     delta = 0;
     max_e_leng = .2;
     maximize_subroutine(y0,cut_indices0,net_edges0,vert_indices,vert_neighs,arcs,x,mass,lambda1,alpha,tol,rho0,...
-            max_m,max_avg_turn,normalize_data,pause_bool,delta,max_e_leng,outer_iter,inner_iter, theta, alpha_2, sigma, n);;
+            max_m,max_avg_turn,normalize_data,pause_bool,delta,max_e_leng,outer_iter,inner_iter, theta, alpha_2, sigma, 4);;
 end
     
 function Optimize_network21(outer_iter, inner_iter)%

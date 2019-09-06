@@ -11,5 +11,5 @@ function E = calculateEnergyTotal(y, Adj, dist_mat,old_dist_mat, K_mat, theta, l
     E2_old = sum(sum(old_dist_mat .* repmat(M, n, 1) .* repmat(M', 1, n)));
     E3 = ((M * K_mat) .^ (p-1))*M';
     E = lambda * E1 + E2 + theta * E3;
-    fprintf(['E =%.6f   E1 = %.4f   E2 = %.4f   old_E2 = %.4f   E3 = %.4f \n'],E, lambda*E1 , E2, E2_old, theta*E3);
+    fprintf(['E =%.6f   E1 = %.4f   E2 = %.4f   E3 = %.4f   old_E = %.6f   old_E2 = %.4f\n'],E, lambda*E1 , E2, theta*E3, E2_old, lambda * E1 + E2_old + theta * E3);
 end

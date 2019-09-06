@@ -88,8 +88,9 @@ fprintf('Old energy: %f, %f\n', energy, energy01);
 %plotGraph(x,y,edges,edge_weights,lambda,alpha,20,mass,rgb_c,ls);
 %energy0 = energy; %will be energy after ADMM
 %fprintf(['\n iter = %d       E = %8.',num2str(num_d),'E'],iter,energy);
-
+energy0 = inf;
 while energy_prev-energy>tol*energy || energy0-energy>tol*energy || energy0<energy || energy_prev<energy || ~check_top || top_change || n_add>0
+    fprintf('%f %f %f %d', energy_prev,energy0,energy, tol);
     energy_prev = energy;
     iter = iter + 1;
     inner_iter = 0;
@@ -102,9 +103,9 @@ while energy_prev-energy>tol*energy || energy0-energy>tol*energy || energy0<ener
         [y_new,z_new,b_new] = updateyzb(y_new,z_new,b_new,x,rho,edges,edge_costs,fi,FIX_ENDPTS);
         fi = 0;
         energy0 = calculateEnergy(y_new,x,edges,edge_costs);
-        energy01 = calculateEnergyOld(y_new,x, net_edges, mass, alpha_2, theta, lambda);
-        energy_1 = calculateEnergyNew(y_new,x, net_edges, mass, alpha_2, theta, lambda);
-        fprintf('Old energy0: %f, %f\n', energy0, energy01);
+%         energy01 = calculateEnergyOld(y_new,x, net_edges, mass, alpha_2, theta, lambda);
+%         energy_1 = calculateEnergyNew(y_new,x, net_edges, mass, alpha_2, theta, lambda);
+%         fprintf('Old energy0: %f, %f, %d\n', energy0, energy01,inner_iter);
         %figure(fig1); plotNet(x,y,net_edges,rgb_c,ls); drawnow;
         %figure(fig2); plotGraph(x,y_new,edges,edge_weights,lambda,alpha,20,mass,rgb_c,ls); drawnow;
         inner_iter = inner_iter + 1;
@@ -162,7 +163,7 @@ while energy_prev-energy>tol*energy || energy0-energy>tol*energy || energy0<ener
     energy = calculateEnergy(y,x,edges,edge_costs);
     energy01 = calculateEnergyOld(y,x, net_edges, mass, alpha_2, theta, lambda);
     energy_1 = calculateEnergyNew(y,x, net_edges, mass, alpha_2, theta, lambda);%In each place of calculating E, we add a calculation of E in the new version
-    fprintf('Old energy: %f, %f\n', energy, energy01);
+    fprintf('1 Old energy: %f, %f\n', energy, energy01);
     if energy0-energy < 10*tol*energy
         more_prec = 1;
     end
@@ -180,7 +181,7 @@ while energy_prev-energy>tol*energy || energy0-energy>tol*energy || energy0<ener
         energy = calculateEnergy(y,x,edges,edge_costs);
         energy01 = calculateEnergyOld(y,x, net_edges, mass, alpha_2, theta, lambda);
         energy_1 = calculateEnergyNew(y,x, net_edges, mass, alpha_2, theta, lambda);
-        fprintf('Old energy: %f, %f\n', energy, energy01);
+        fprintf('2 Old energy: %f, %f\n', energy, energy01);
         %fprintf(['\n       E = %8.',num2str(num_d),'E      m = %d'],energy,length(y(:,1)));
     end
     if plot_bool
