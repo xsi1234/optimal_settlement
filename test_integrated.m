@@ -113,8 +113,9 @@ end
 function Optimize_network(outer_iter, inner_iter)
     x = [0,0;0,1;1,1;1,0];
     mass = 1/4*ones(1,4);
-    [ y0,net_edges0 ] = rndInitialize(x,20);
-
+    %[ y0,net_edges0 ] = rndInitialize(x,20);
+    y0 = [1 0; 1 1];
+    net_edges0 = [1 2];
     cut_indices0 = [];
     vert_indices = [];
     vert_neighs = [];
@@ -877,7 +878,7 @@ function maximize_subroutine(y0,cut_indices0,net_edges0,vert_indices,vert_neighs
         axis equal;
         drawnow;
     %   avg_min_dist = mean(min(X_mat));
-        [y,net_edges,~,~,~,~,~,~] = onut(y,net_edges,x,mass,lambda1,alpha,alpha_2,theta,...        
+        [y,net_edges,~,~,~,~,~,~] = onut(y,net_edges,x,mass,lambda1,alpha,alpha,theta,...        
             tol,rho0,max_m,max_avg_turn,normalize_data,pause_bool,delta,max_e_leng);   % SK
         toc
       %  y2 = y;
@@ -895,7 +896,7 @@ function maximize_subroutine(y0,cut_indices0,net_edges0,vert_indices,vert_neighs
         plot_particles(x, color_mat);
         axis equal;
         drawnow;
-        x = euler_wrap(x, y, Adj, mass, inner_iter, p, h, alpha_2, theta, sigma, lambda1, color_mat,net_edges);
+        x = euler_wrap(x, y, Adj, mass, inner_iter, p, h, alpha, theta, sigma, lambda1, color_mat,net_edges);
     end
 end
 function [Y2, net_edges2] = piecewise_network(Y, net_edges, min_dist)
