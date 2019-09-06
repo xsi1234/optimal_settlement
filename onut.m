@@ -90,7 +90,8 @@ fprintf('Old energy: %f, %f\n', energy, energy01);
 %fprintf(['\n iter = %d       E = %8.',num2str(num_d),'E'],iter,energy);
 energy0 = inf;
 while energy_prev-energy>tol*energy || energy0-energy>tol*energy || energy0<energy || energy_prev<energy || ~check_top || top_change || n_add>0
-    fprintf('%f %f %f %d', energy_prev,energy0,energy, tol);
+    fprintf("%d %d %d %d %d %d             ",energy_prev-energy>tol*energy,energy0-energy>tol*energy,energy0<energy, energy_prev<energy,~check_top,top_change,n_add>0);
+    fprintf('%f %f %f %d\n', energy_prev,energy0,energy, tol);
     energy_prev = energy;
     iter = iter + 1;
     inner_iter = 0;
@@ -179,9 +180,6 @@ while energy_prev-energy>tol*energy || energy0-energy>tol*energy || energy0<ener
         [y,z,b,net_edges] = modifySpacingAllComps(y,r,top_struct,n_add,max_m,eo,1,FIX_ENDPTS);
         [edges,edge_costs,edge_weights,net_edges,~,neighbors,y,z,b,next,top_change,dists] = computeEdgeWeights(y,x,alpha,lambda,net_edges,mass,check_top,e_heur,delta);
         energy = calculateEnergy(y,x,edges,edge_costs);
-        energy01 = calculateEnergyOld(y,x, net_edges, mass, alpha_2, theta, lambda);
-        energy_1 = calculateEnergyNew(y,x, net_edges, mass, alpha_2, theta, lambda);
-        fprintf('2 Old energy: %f, %f\n', energy, energy01);
         %fprintf(['\n       E = %8.',num2str(num_d),'E      m = %d'],energy,length(y(:,1)));
     end
     if plot_bool
