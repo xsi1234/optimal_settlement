@@ -117,20 +117,20 @@ while energy_prev-energy>tol*energy || energy0-energy>tol*energy || energy0<ener
 %         end
     end
     if energy0>energy_prev %inner_iter==MAX_INNER_ITER &&
-        %fprintf('\n MAX INNER ITERATIONS (%d) REACHED, ENERGY DID NOT DECREASE',MAX_INNER_ITER);
+        fprintf('\n MAX INNER ITERATIONS (%d) REACHED, ENERGY DID NOT DECREASE',MAX_INNER_ITER);
     else
         y = y_new; z = z_new; b=b_new;
     end
     if inner_iter>1
         %fprintf('\n %d inner ADMM iterations',inner_iter);
         %fprintf('\n %d inner iters',inner_iter);
-        if ~isempty(z) && length(z_prev(:,1))==length(z(:,1))
-            [r_pri,r_dual] = computeResiduals(x,y,edges,z,z_prev,rho);
+        if ~isempty(z_new) && length(z_prev(:,1))==length(z_new(:,1))
+            [r_pri,r_dual] = computeResiduals(x,y,edges,z_new,z_prev,rho);
             if r_pri>5*r_dual, rho = rho*1.3;
-                %if ~isempty(rho0), fprintf('    rho = %3.2E',rho); end
+                if ~isempty(rho0), fprintf('    rho = %3.2E',rho); end
             end
             if 5*r_pri<r_dual, rho = rho/2;
-                %if ~isempty(rho0), fprintf('    rho = %3.2E',rho); end
+                if ~isempty(rho0), fprintf('    rho = %3.2E',rho); end
             end
         end
     end
