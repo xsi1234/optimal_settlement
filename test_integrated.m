@@ -31,10 +31,6 @@ function test_integrated(test_case, outer_iter_num, inner_iter_num)
         Optimize_network8(outer_iter_num, inner_iter_num);
     elseif test_case == 9
         Optimize_network9(outer_iter_num, inner_iter_num);
-    elseif test_case == 92
-        Optimize_network92(outer_iter_num, inner_iter_num);   
-    elseif test_case == 93
-        Optimize_network93(outer_iter_num, inner_iter_num);
     elseif test_case == 10
         Optimize_network10(outer_iter_num, inner_iter_num);
     elseif test_case == 11
@@ -139,8 +135,8 @@ end
     
 function Optimize_network21(outer_iter, inner_iter)%
     rng(2);
-    n = 3*80;
-    m = 60;
+    n = 3*5;
+    m = 21;
 
     x1(:,1) = -sqrt(2):sqrt(2)/(n/3-1):0;
     x1(:,2) = zeros(n/3,1);
@@ -166,7 +162,7 @@ function Optimize_network21(outer_iter, inner_iter)%
     alpha_2 = 0.2;
     theta = 0.5;
     sigma = 0.05;
-    lambda1 = .02;
+    lambda1 = .03;
     rho0 = .2;
     tol = 10^4;
     alpha = .5;
@@ -479,7 +475,7 @@ end
 
 function Optimize_network9(outer_iter, inner_iter)
     del_r = .1;
-    n_r = 10;
+    n_r = 7;
     x = [0,0];
     for i=1:n_r
         r_i = i*del_r;
@@ -487,7 +483,7 @@ function Optimize_network9(outer_iter, inner_iter)
         thetas = (2*pi/n_ri:2*pi/n_ri:2*pi)'-(pi/n_ri);
         x = [x;r_i*cos(thetas),r_i*sin(thetas)];
     end
-    x=0.6*x;
+    x=0.4*x;
     n = length(x(:,1))
     total_mass=1;
     mass = (total_mass/n)*ones(1,n);
@@ -523,7 +519,7 @@ function Optimize_network9(outer_iter, inner_iter)
     alpha_2 = 0.2;
     theta = 0.5;
     sigma = 0.05;    
-    lambda1 = .05;
+    lambda1 = .08;
     rho0 = .5;
     tol = 0.5*10^-4;
     alpha = .1;
@@ -855,7 +851,7 @@ function maximize_subroutine(y0,cut_indices0,net_edges0,vert_indices,vert_neighs
     net_edges = net_edges0;
     color_mat = rand(n,3);
     p = 3;
-    h = 0.005;
+    h = 0.0004;
     for j = 1:outer_iter
         fprintf('\n outer iter = %d', j);
         tic

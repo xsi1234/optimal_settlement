@@ -9,12 +9,12 @@ function X_res = euler_wrap(X, Y, Adj, M, iter_num, p, h0, alpha, theta, sigma, 
     X_record = [];
     E_last = inf;
     for i = 1:iter_num
-        if h < h0*0.001
+        if h < h0*0.000001
             break
         end
         [E,grad,X] = euler_iter(X, M, Y, Adj, h, p, theta, alpha,sigma,lambda);
         if E > E_last
-            h = h * 1/2;
+            h = h * 1/2
         end
         E_last = E;
         %X = X + h*(rand(size(X))-0.5)*0.1;
