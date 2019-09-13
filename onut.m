@@ -83,15 +83,12 @@ iter = 0; check_top = 0; e_heur = 0; more_prec = 0; n_add = 1;
 energy = calculateEnergy(y,x,edges,edge_costs);
 energy01 = calculateEnergyOld(y,x, net_edges, mass, alpha_2, theta, lambda);
 energy_1 = calculateEnergyNew(y,x, net_edges, mass, alpha_2, theta, lambda);
-fprintf('Old energy: %f, %f\n', energy, energy01);
 %fig2 = figure;
 %plotGraph(x,y,edges,edge_weights,lambda,alpha,20,mass,rgb_c,ls);
 %energy0 = energy; %will be energy after ADMM
 %fprintf(['\n iter = %d       E = %8.',num2str(num_d),'E'],iter,energy);
 energy0 = inf;
 while energy_prev-energy>tol*energy || energy0-energy>tol*energy || energy0<energy || energy_prev<energy || ~check_top || top_change || n_add>0
-    fprintf("%d %d %d %d %d %d             ",energy_prev-energy>tol*energy,energy0-energy>tol*energy,energy0<energy, energy_prev<energy,~check_top,top_change,n_add>0);
-    fprintf('%f %f %f %d\n', energy_prev,energy0,energy, tol);
     energy_prev = energy;
     iter = iter + 1;
     inner_iter = 0;
@@ -127,10 +124,12 @@ while energy_prev-energy>tol*energy || energy0-energy>tol*energy || energy0<ener
         if ~isempty(z_new) && length(z_prev(:,1))==length(z_new(:,1))
             [r_pri,r_dual] = computeResiduals(x,y,edges,z_new,z_prev,rho);
             if r_pri>5*r_dual, rho = rho*1.3;
-                if ~isempty(rho0), fprintf('    rho = %3.2E',rho); end
+                if ~isempty(rho0), %fprintf('    rho = %3.2E',rho); 
+                end
             end
             if 5*r_pri<r_dual, rho = rho/2;
-                if ~isempty(rho0), fprintf('    rho = %3.2E',rho); end
+                if ~isempty(rho0), %fprintf('    rho = %3.2E',rho);
+                end
             end
         end
     end
@@ -164,7 +163,6 @@ while energy_prev-energy>tol*energy || energy0-energy>tol*energy || energy0<ener
     energy = calculateEnergy(y,x,edges,edge_costs);
     energy01 = calculateEnergyOld(y,x, net_edges, mass, alpha_2, theta, lambda);
     energy_1 = calculateEnergyNew(y,x, net_edges, mass, alpha_2, theta, lambda);%In each place of calculating E, we add a calculation of E in the new version
-    fprintf('1 Old energy: %f, %f\n', energy, energy01);
     if energy0-energy < 10*tol*energy
         more_prec = 1;
     end

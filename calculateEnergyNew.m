@@ -49,7 +49,7 @@ function E = calculateEnergyNew(Y,X, net_edges,M, alpha, theta, lambda)
     end
     E3 = ((M * K_mat) .^ (3-1))*M';
     E = lambda*E2 + E1+ theta*E3;
-    fprintf(['E =%.6f   E1 = %.4f   E2 = %.4f   E3 = %.4f\n'],E, lambda*E2, E1, theta*E3);
+    fprintf(['E =%.6f   E1 = %.6f   E2 = %.6f   E3 = %.6f\n'],E, lambda*E2, E1, theta*E3);
 end    
     
     

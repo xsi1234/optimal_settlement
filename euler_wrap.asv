@@ -12,12 +12,15 @@ function X_res = euler_wrap(X, Y, Adj, M, iter_num, p, h0, alpha, theta, sigma, 
         if h < h0*0.000001
             break
         end
+        fprintf(['h = %.6f\n'],h);
         [E,grad,X_new] = euler_iter(X, M, Y, Adj, h, p, theta, alpha,sigma,lambda);
+        X_new'
+        fprintf(['E =%.6f   E_last = %.6f\n'],E, E_last);
         if E > E_last
-            h = h * 3/4;
+            h = h * 1/2;
+            fprintf("skip this loop\n");
             continue;
         end
-        %fprintf(['E =%.6f   E_last = %.6f\n'],E, E_last);
         X = X_new;
         E_last = E;
         %X = X + h*(rand(size(X))-0.5)*0.1;
@@ -177,7 +180,7 @@ end
 
 
 %One iteration of forward Euler Scheme
-function [E,grad,X_new] = euler_iter(X, M, Y, Adj, h, p, theta, alpha,sigma, lambda)
+function [E,grad,X_new] = euler_iter(X, M, Y, Adj, h, p, theta, alpha,sigma, lambda, dists, old_dists,next)
     l = size(X,1);
     X_new = zeros(size(X));
 %     K_mat = arrayfun(@(i) computeK(X(mod(i,l)+1,:)-X(ceil(i/l),:), sigma), 1:l*l);
@@ -192,42 +195,44 @@ function [E,grad,X_new] = euler_iter(X, M, Y, Adj, h, p, theta, alpha,sigma, lam
     K_mat_1 = (M * K_mat).^(p-2);
     ly = size(Y, 1);
     XY_union = cat(1, Y, X);
-    D_mat = squareform(pdist(XY_union));
-    mask = Adj*(1-alpha);
-    mask(l+ly, l+ly) = 0;
-    D_mat = D_mat - mask .* D_mat;
-    old_D_mat = D_mat;
-    for k = 1:ly
-        for j = 1:ly
-            if Adj(k,j) == 1
-                yk = Y(k,:);
-                yj = Y(j,:);
-                for i= 1:l
-                   xi = X(i, :);
-                   beta = acos(dot(xi-yk, yj-yk)/(norm(xi-yk)*norm(yj-yk)));
-                   gamma = acos(dot(xi-yj, yk-yj)/(norm(xi-yj)*norm(yj-yk)));
-                   theta1 = acos(alpha);
-                   if beta < theta1 && gamma < pi - theta1
-                        v1 = xi - yk;
-                        v2 = yk - yj;
-                        v = -(yj-yk)/norm(yj-yk);%normalized vector from z2 to zi
-                        xp = dot(xi-yk,v)*v+yk; %projection of xk onto the vector;
-                        px = xp + v * norm(xi - xp) * cot(theta);
-                        d = norm(xi-px) + alpha * norm(px-yk);
-                        D_mat(ly+i, k) = d;
-                   end
-                end    
+    if dists == NaN
+        D_mat = squareform(pdist(XY_union));
+        mask = Adj*(1-alpha);
+        mask(l+ly, l+ly) = 0;
+        D_mat = D_mat - mask .* D_mat;
+        old_D_mat = D_mat;
+        for k = 1:ly
+            for j = 1:ly
+                if Adj(k,j) == 1
+                    yk = Y(k,:);
+                    yj = Y(j,:);
+                    for i= 1:l
+                       xi = X(i, :);
+                       beta = acos(dot(xi-yk, yj-yk)/(norm(xi-yk)*norm(yj-yk)));
+                       gamma = acos(dot(xi-yj, yk-yj)/(norm(xi-yj)*norm(yj-yk)));
+                       theta1 = acos(alpha);
+                       if beta < theta1 && gamma < pi - theta1
+                            v1 = xi - yk;
+                            v2 = yk - yj;
+                            v = -(yj-yk)/norm(yj-yk);%normalized vector from z2 to zi
+                            xp = dot(xi-yk,v)*v+yk; %projection of xk onto the vector;
+                            px = xp + v * norm(xi - xp) * cot(theta);
+                            d = norm(xi-px) + alpha * norm(px-yk);
+                            D_mat(ly+i, k) = d;
+                       end
+                    end    
+                end
             end
         end
+        [dists, next] = floyd1(D_mat);
+        [old_dists, ~] = floyd1(old_D_mat);
     end
-    [dists, next] = floyd1(D_mat);
-    [old_dists, old_next] = floyd1(old_D_mat);
     for i = 1:l
         %theta*nextstep_E2(X, l, i, M, p, K_mat_1,sigma)
         X_new(i,:) = X(i,:)+h*(nextstep_E1(l, ly, XY_union, next, i, M, alpha)+theta*nextstep_E2(X, l, i, M, p, K_mat_1,sigma));
     end
     grad = X_new - X;
-    E = calculateEnergyTotal(Y, Adj, X_new, K_mat, theta, lambda, p, M,alpha);
+    E = calculateEnergyTotal(Y, Adj, dists(ly+1:l+ly, ly+1:ly+l), old_dists(ly+1:l+ly, ly+1:ly+l), K_mat, theta, lambda, p, M);
     %grad = grad / norm(grad);
     %step_len = sum(vecnorm(X_new-X))/h;
     %step_len

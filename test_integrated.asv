@@ -20,7 +20,7 @@ function test_integrated(test_case, outer_iter_num, inner_iter_num)
     elseif test_case == 21
         Optimize_network21(outer_iter_num, inner_iter_num);
     elseif test_case == 22
-        Optimize_network22(outer_iter_num, inner_iter_num);
+        Optimize_network21(outer_iter_num, inner_iter_num);
     elseif test_case == 13
         Optimize_network13(outer_iter_num, inner_iter_num);
     elseif test_case == 14
@@ -145,7 +145,7 @@ function Optimize_network22(outer_iter, inner_iter)%
     x2(:,1) = 0:1/(n/3-1):1;
     x2(:,2) = 0:sqrt(3)/(n/3-1):sqrt(3);
     x3(:,1) = 0:1/(n/3-1):1;
-    x3(:,2) = 0:-sqrt(3)/(n/3-1):-sqrt(3);
+    x3(:,2) = -0:sqrt(3)/(n/3-1):sqrt(3);
     x = [x1;x2;x3] + .1*randn(n,2);
     total_mass = 1;
     mass = total_mass/n*ones(1,n);
@@ -191,6 +191,7 @@ function Optimize_network21(outer_iter, inner_iter)%
     x3(:,1) = x2(:,1);
     x3(:,2) = -x2(:,1);
     x = [x1;x2;x3] + .1*randn(n,2);
+    size(x)
     total_mass = 1;
     mass = total_mass/n*ones(1,n);
 
