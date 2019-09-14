@@ -16,12 +16,11 @@ function X_res = euler_wrap(X, Y, Adj, M, iter_num, p, h0, alpha, theta, sigma, 
     end
     E_last = calculateEnergyTotal(Y, Adj, X, K_mat, theta, lambda, p, M,alpha);
     for i = 1:iter_num
-        if h < h0*0.00001
+        if h < h0*0.000001
             for j = 1:20
                 X = X + (rand(size(X))-0.5)*0.00001;
-                [E,grad,X_new] = euler_iter(X, M, Y, Adj, h, p, theta, alpha,sigma,lambda); 
-            end
-            break;
+                [E,grad,X_new] = euler_iter(X, M, Y, Adj, h, p, theta, alpha,sigma,lambda);
+         
         end
         [E,grad,X_new] = euler_iter(X, M, Y, Adj, h, p, theta, alpha,sigma,lambda);
         if E > E_last
