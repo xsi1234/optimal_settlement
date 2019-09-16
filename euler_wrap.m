@@ -18,7 +18,8 @@ function X_res = euler_wrap(X, Y, Adj, M, iter_num, p, h0, alpha, theta, sigma, 
     for i = 1:iter_num
         if h < h0*0.00001
             for j = 1:20
-                X = X + (rand(size(X))-0.5)*0.00001;
+                fprintf("Testing with other directions\n");
+                X = X + (rand(size(X))-0.5)*0.0001;
                 [E,grad,X_new] = euler_iter(X, M, Y, Adj, h, p, theta, alpha,sigma,lambda); 
             end
             break;
@@ -29,7 +30,7 @@ function X_res = euler_wrap(X, Y, Adj, M, iter_num, p, h0, alpha, theta, sigma, 
             continue;
         end
         %fprintf(['E =%.6f   E_last = %.6f\n'],E, E_last);
-        fprintf("Accepted new configuration of X \n")
+        fprintf("Accepted new configuration of X \n");
         X = X_new;
         E_last = E;
         h = h0;
