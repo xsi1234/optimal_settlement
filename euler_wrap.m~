@@ -22,10 +22,9 @@ function X_res = euler_wrap(X, Y, Adj, M, iter_num, p, h0, alpha, theta, sigma, 
         end
         [E,grad,X_new] = euler_iter(X, M, Y, Adj, h, p, theta, alpha,sigma,lambda);
         if E > E_last
-            plotting = X+(100*grad);
-            plot_particles(X, color_mat);
+            X+(1000*gra
             for i = 1:l
-                plot([X(i,1) plotting(i,1)],[X(i,2) plotting(i,2)], 'LineWidth', 1, 'color', 'b');
+                plot([X(i,1) X_new(i,1)],[X(i,2) X_new(i,2)], 'LineWidth', 1, 'color', 'b');
             end
             drawnow;
             break;
@@ -69,7 +68,7 @@ function plot_network (Y, Adj)
     end
 end
 
-function plot_particles(X, color_mat)
+function plot_particles(X, X_record, color_mat)
 %     for i = 1:size(X_record, 1)
 %         plot(X_record(i,1), X_record(i,2), 'marker','.','color', color_mat(mod(i-1,size(X,1))+1,:));
 %     end
