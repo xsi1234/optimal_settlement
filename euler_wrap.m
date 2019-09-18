@@ -17,19 +17,16 @@ function X_res = euler_wrap(X, Y, Adj, M, iter_num, p, h0, alpha, theta, sigma, 
     E_last = calculateEnergyTotal(Y, Adj, X, K_mat, theta, lambda, p, M,alpha);
     for i = 1:iter_num
         if h < h0*0.00001
-            for j = 1:20
-                X = X + (rand(size(X))-0.5)*0.00001;
-                [E,grad,X_new] = euler_iter(X, M, Y, Adj, h, p, theta, alpha,sigma,lambda); 
-            end
-            break;
+            X = X + (rand(size(X))-0.5)*0.00001;
+            h = h0;
         end
         [E,grad,X_new] = euler_iter(X, M, Y, Adj, h, p, theta, alpha,sigma,lambda);
         if E > E_last
-            h = h * 1/2;
+            h = h * 3/4;
             continue;
         end
         %fprintf(['E =%.6f   E_last = %.6f\n'],E, E_last);
-        fprintf("Accepted new configuration of X \n")
+        fprintf("Accepted new configuration of X \n");
         X = X_new;
         E_last = E;
         h = h0;
@@ -235,11 +232,16 @@ function [E,grad,X_new] = euler_iter(X, M, Y, Adj, h, p, theta, alpha,sigma, lam
     [dists, next] = floyd1(D_mat);
     [old_dists, old_next] = floyd1(old_D_mat);
     for i = 1:l
-        %theta*nextstep_E2(X, l, i, M, p, K_mat_1,sigma)
-        X_new(i,:) = X(i,:)+h*(nextstep_E1(l, ly, XY_union, next, i, M, alpha)+theta*nextstep_E2(X, l, i, M, p, K_mat_1,sigma));
+        X_new(i,:) = X(i,:)++h*nextstep_E1(l, ly, XY_union, next, i, M, alpha)+h*theta*nextstep_E2(X, l, i, M, p, K_mat_1,sigma);
+    end
+    new_K_mat = zeros(l);
+    for i = 1:l
+        for j = 1:l
+            new_K_mat(i,j) = computeK(X_new(i, :) - X_new(j, :), sigma);
+        end
     end
     grad = X_new - X;
-    E = calculateEnergyTotal(Y, Adj, X_new, K_mat, theta, lambda, p, M,alpha);
+    E = calculateEnergyTotal(Y, Adj, X_new, new_K_mat, theta, lambda, p, M,alpha);
     %grad = grad / norm(grad);
     %step_len = sum(vecnorm(X_new-X))/h;
     %step_len
