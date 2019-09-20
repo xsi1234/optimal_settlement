@@ -158,8 +158,8 @@ function Optimize_network22(outer_iter, inner_iter)%
     vert_indices = [1,m/3,2*m/3,m];
     vert_neighs = {2,[m/3-1,m/3+1,2*m/3+1],2*m/3-1,m-1};
     arcs = {1:m/3,m/3:2*m/3,[m/3,2*m/3+1:m]};
-    x=0.35*x;
-    y0=0.25*y0;
+    x=0.2*x;
+    y0=0.15*y0;
     net_edges0 = [];
     alpha_2 = 0.2;
     theta = 0.5;
@@ -181,7 +181,7 @@ end
 
 function Optimize_network21(outer_iter, inner_iter)%
     rng(2);
-    n = 3*25;
+    n = 3*18;
     m = 21;
 
     x1(:,1) = -sqrt(2):sqrt(2)/(n/3-1):0;
@@ -896,7 +896,7 @@ function maximize_subroutine(y0,cut_indices0,net_edges0,vert_indices,vert_neighs
     net_edges = net_edges0;
     color_mat = rand(n,3);
     p = 3;
-    h = 0.0004;
+    h = 0.01;
     for j = 1:outer_iter
         fprintf('\n outer iter = %d', j);
         tic
