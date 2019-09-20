@@ -17,7 +17,6 @@ function X_res = euler_wrap(X, Y, Adj, M, iter_num, p, h0, alpha, theta, sigma, 
     E_last = calculateEnergyTotal(Y, Adj, X, K_mat, theta, lambda, p, M,alpha);
     for i = 1:iter_num
         if h < 0.00001
-            grad1
             plotting1 = X+grad1/30;
             plotting2 = X+grad2/30;
             plotting_sum = X+(grad1+grad2)/30;
