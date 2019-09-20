@@ -1,9 +1,6 @@
 function E = calculateEnergyTotal(Y, Adj, X, K_mat, theta, lambda, p, M,alpha)
     total_mass = sum(M);
     n = size(K_mat,1);
-    for i = 1:n
-        K_mat(i,i) = 0;
-    end
     l = size(X,1);
     ly = size(Y, 1);
     XY_union = cat(1, Y, X);
