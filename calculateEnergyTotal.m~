@@ -1,9 +1,6 @@
-function E = calculateEnergyNew(Y,X, net_edges,M, alpha, theta, lambda)
-    Adj = zeros(size(Y,1));
-    for i = 1:size(net_edges, 1)
-        Adj(net_edges(i,1), net_edges(i,2)) = 1;
-    end
-    Adj = or(Adj, Adj');
+function E = calculateEnergyTotal(Y, Adj, X, K_mat, theta, lambda, p, M,alpha)
+    total_mass = sum(M);
+    n = size(K_mat,1);
     l = size(X,1);
     ly = size(Y, 1);
     XY_union = cat(1, Y, X);
@@ -35,24 +32,25 @@ function E = calculateEnergyNew(Y,X, net_edges,M, alpha, theta, lambda)
             end
         end
     end
-    [dists, next] = floyd(D_mat);
-    dists = dists(ly+1:l+ly, ly+1:ly+l);
-    E2 = sum(sum(dists .* repmat(M, l, 1) .* repmat(M', 1, l)));
-    E1 = sum(sum(Adj .* squareform(pdist(Y))))/2;
-    K_mat = zeros(l);
-    for i = 1:l
-        for j = 1:l
-            if i ~= j
-                K_mat(i,j) = computeK(X(i, :) - X(j, :), 0.05);
-            end
-        end
-    end
-    E3 = ((M * K_mat) .^ (3-1))*M';
-    E = lambda*E1 + E2*0.5+ theta*E3;
-    fprintf(['E =%.6f   E1 = %.6f   E2 = %.6f   E3 = %.6f\n'],E, lambda*E1, E2*0.5, theta*E3);
-end    
-    
-    
+    [dists, ~] = floyd(D_mat);
+    [old_dists, ~] = floyd(old_D_mat);
+    dist_mat = dists(ly+1:l+ly, ly+1:ly+l);
+    old_dist_mat = old_dists(ly+1:l+ly, ly+1:ly+l);
+    Adj = triu(Adj); 
+    network_cost = Adj .* squareform(pdist(Y));
+    E1 = sum(sum(network_cost));
+    E2 = sum(sum(dist_mat .* repmat(M, n, 1) .* repmat(M', 1, n)));
+    E2_old = sum(sum(old_dist_mat .* repmat(M, n, 1) .* repmat(M', 1, n)));
+    E3 = ((M * K_mat) .^ (p-1))*M';
+    E = lambda * E1 + E2*0.5 + theta * E3;
+    E_per_particle = zeros(l, 1);
+    for i =1:l
+        E2_part = sum(dist_mat(i, :)*M)*M(i)*0.5;
+        E3_part = sum(K_mat(i,:)*M)^2*M(i)*theta
+        E_per_particle
+    fprintf(['E =%.6f   E1 = %.6f   E2 = %.6f   E3 = %.6f   old_E2 = %.6f   old_E = %.6f\n'],E, lambda*E1 , E2*0.5, theta*E3, E2_old, lambda * E1 + E2_old + theta * E3);
+end
+
 function [dists,next] = floyd(weight_mat)
 N = length(weight_mat(1,:));
 dists = weight_mat;
@@ -68,8 +66,4 @@ for k=1:N
         end
     end
 end
-end
-
-function y = computeK(x, sigma)
-y = exp(-x*x'/(sigma^2))/sigma;
 end
