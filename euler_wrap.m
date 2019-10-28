@@ -7,7 +7,7 @@ function X_res = euler_wrap(X, Y, Adj, M, iter_num, p, h0, alpha, theta, sigma, 
     tic
     h = h0;
     X_record = [];
-    l = size(X,1);
+    l = size(X,1)
     K_mat = zeros();
     for i = 1:l
         for j = 1:l
@@ -267,7 +267,7 @@ function [E,grad_E1,grad_E2,X_new] = euler_iter(X, M, Y, Adj, h, p, theta, alpha
             new_K_mat(i,j) = computeK(X_new(i, :) - X_new(j, :), sigma,0);
         end
     end
-    [E, E_per_particle] = calculateEnergyTotal(Y, Adj, X_new, new_K_mat, theta, lambda, p, M,alpha);
+    E = calculateEnergyTotal(Y, Adj, X_new, new_K_mat, theta, lambda, p, M,alpha);
     %grad = grad / norm(grad);
     %step_len = sum(vecnorm(X_new-X))/h;
     %step_len

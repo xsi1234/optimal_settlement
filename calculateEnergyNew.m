@@ -37,8 +37,8 @@ function E = calculateEnergyNew(Y,X, net_edges,M, alpha, theta, lambda)
     end
     [dists, next] = floyd(D_mat);
     dists = dists(ly+1:l+ly, ly+1:ly+l);
-    E2 = sum(sum(dists .* repmat(M, l, 1) .* repmat(M', 1, l)));
-    E1 = sum(sum(Adj .* squareform(pdist(Y))))/2;
+    E1 = sum(sum(dists .* repmat(M, l, 1) .* repmat(M', 1, l)));
+    E2 = sum(sum(Adj .* squareform(pdist(Y))))/2;
     K_mat = zeros(l);
     for i = 1:l
         for j = 1:l
@@ -48,8 +48,8 @@ function E = calculateEnergyNew(Y,X, net_edges,M, alpha, theta, lambda)
         end
     end
     E3 = ((M * K_mat) .^ (3-1))*M';
-    E = lambda*E1 + E2*0.5+ theta*E3;
-    fprintf(['E =%.6f   E1 = %.6f   E2 = %.6f   E3 = %.6f\n'],E, lambda*E1, E2*0.5, theta*E3);
+    E = lambda*E2 + E1+ theta*E3;
+    fprintf(['E =%.6f   E1 = %.6f   E2 = %.6f   E3 = %.6f\n'],E, lambda*E2, E1, theta*E3);
 end    
     
     
