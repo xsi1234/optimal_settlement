@@ -11,7 +11,7 @@ function X_res = euler_wrap(X, Y, Adj, M, iter_num, p, h0, alpha, theta, sigma, 
     K_mat = zeros();
     for i = 1:l
         for j = 1:l
-            K_mat(i,j) = computeK(X(i, :) - X(j, :), sigma,0);
+            K_mat(i,j) = computeK(X(i, :) - X(j, :), sigma);
         end
     end
     E_last = calculateEnergyTotal(Y, Adj, X, K_mat, theta, lambda, p, M,alpha);
@@ -80,43 +80,64 @@ function plot_particles(X, color_mat)
     end
 end
 
-function y = computeK(x, sigma, i)
-    if i == 0
-        y = exp(-x*x'/(2*sigma^2))/(2*pi*sigma);
-    elseif i==1
-        y = exp(-norm(x)/sigma)/(2*pi*sigma);
-    elseif i==2
-        y = 2*(-log(norm(x))+log(sigma))/(pi * sigma^2);
-    end
-end
-
-function y = computeKgrad(x, sigma, i)
-    if i == 0
-        y = -exp(-x*x'/(2*sigma^2))/(2*pi*sigma^2); 
-    elseif i==1
-        y = -exp(-norm(x)/sigma)*(x/norm(x))/(2*pi*sigma^3);
-    elseif i==2
-        y = -2*x/(pi*sigma^2*norm(x)^2);
-    end
-end
-
 % function y = computeK(x, sigma)
-% y = exp(-norm(x)/(sigma^2))/sigma;
-% if y < 1e-20
-%     y=0;
-% end
+% y = exp(-x*x'/(sigma^2))/sigma;
 % end
 % 
 % function y = computeKgrad(x, sigma)
-% y = -(x /norm(x))*computeK(x, sigma)/(sigma^2); 
+% y = -2* x * computeK(x,sigma)/(sigma^2); 
 % end
+
+%  function y = computeK(x, sigma)
+%  y = exp(-norm(x)/(sigma))/sigma;
+%  end
+% 
+%  function y = computeKgrad(x, sigma)
+%  if  norm(x) < 1e-10
+%      y=[0,0];
+%  else
+%    y = -(x /norm(x))*computeK(x, sigma)/(sigma);
+%  end;
+%  end
+% 
+  function y = computeK(x, sigma)
+  if  (norm(x) > sigma) | (norm(x) < 1e-8)
+    y = 0;
+  else
+    y=-1/(sigma^2)*log(norm(x)/sigma);
+  end
+  end
+
+  function y = computeKgrad(x, sigma)
+  if  (norm(x) > sigma) | (norm(x) < 1e-8)
+      y=[0,0];
+  else
+    y = -(x /(x*x'))/(sigma^2);
+  end
+  end
+
+%    function y = computeK(x, sigma)
+%  if  norm(x) < 1e-10
+%  y = 0;
+%  else
+%  y=1/(x*x');
+%  end;
+%  end
+%
+%  function y = computeKgrad(x, sigma)
+%  if  norm(x) < 1e-7
+%      y=[0,0];
+%  else
+%    y = -x /((x*x')^2);
+%  end;
+%  end
 
 %Computing the convolving term for a given index k
 function U=nextstep_E2(X, l, k, M, p, K_mat,sigma)
     K_grad_kth = zeros(l, 2);
     for i = 1:l
         if i~=k
-            K_grad_kth(i, :) = computeKgrad(X(k, :)-X(i, :),sigma,0);
+            K_grad_kth(i, :) = computeKgrad(X(k, :)-X(i, :),sigma);
         end
     end
     u_component_1 = M * K_grad_kth .* (K_mat(k));
@@ -216,7 +237,7 @@ function [E,grad_E1,grad_E2,X_new] = euler_iter(X, M, Y, Adj, h, p, theta, alpha
     K_mat = zeros(l);
     for i = 1:l
         for j = 1:l
-            K_mat(i,j) = computeK(X(i, :) - X(j, :), sigma,0);
+            K_mat(i,j) = computeK(X(i, :) - X(j, :), sigma);
         end
     end
     K_mat_1 = (M * K_mat).^(p-2);
@@ -264,7 +285,7 @@ function [E,grad_E1,grad_E2,X_new] = euler_iter(X, M, Y, Adj, h, p, theta, alpha
     new_K_mat = zeros(l);
     for i = 1:l
         for j = 1:l
-            new_K_mat(i,j) = computeK(X_new(i, :) - X_new(j, :), sigma,0);
+            new_K_mat(i,j) = computeK(X_new(i, :) - X_new(j, :), sigma);
         end
     end
     E = calculateEnergyTotal(Y, Adj, X_new, new_K_mat, theta, lambda, p, M,alpha);
