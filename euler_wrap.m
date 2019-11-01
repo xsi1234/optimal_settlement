@@ -29,7 +29,7 @@ function X_res = euler_wrap(X, Y, Adj, M, iter_num, p, h0, alpha, theta, sigma, 
             drawnow;
             break;
         end
-        [E,grad1, grad2,X_new] = euler_iter(X, M, Y, Adj, h, p, theta, alpha,sigma,lambda);
+        [E,grad1, grad2,X_new, E_per_particle] = euler_iter(X, M, Y, Adj, h, p, theta, alpha,sigma,lambda);
         if E > E_last
             h = h * 1/2;
             continue;
@@ -43,6 +43,7 @@ function X_res = euler_wrap(X, Y, Adj, M, iter_num, p, h0, alpha, theta, sigma, 
             X_record = [X_record', X']';
         end
     end
+    E_per_particle'
     toc
     X_res = X;
 %    plot_particles(X, X_record, color_mat);
@@ -195,7 +196,7 @@ end
 
 
 %One iteration of forward Euler Scheme
-function [E,grad_E1,grad_E2,X_new] = euler_iter(X, M, Y, Adj, h, p, theta, alpha,sigma, lambda)
+function [E,grad_E1,grad_E2,X_new, E_per_particle] = euler_iter(X, M, Y, Adj, h, p, theta, alpha,sigma, lambda)
     l = size(X,1);
     X_new = zeros(size(X));
 %     K_mat = arrayfun(@(i) computeK(X(mod(i,l)+1,:)-X(ceil(i/l),:), sigma), 1:l*l);
