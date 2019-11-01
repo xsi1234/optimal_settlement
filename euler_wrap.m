@@ -81,7 +81,7 @@ function plot_particles(X, color_mat)
 end
 
 % function y = computeK(x, sigma)
-% y = exp(-x*x'/(sigma^2))/sigma;
+% y = exp(-x*x'/(sigma^2))/sigma^2;
 % end
 % 
 % function y = computeKgrad(x, sigma)
