@@ -562,7 +562,7 @@ function Optimize_network9(outer_iter, inner_iter)
     vert_neighs = [];
     arcs = [];
     alpha_2 = 0.2;
-    theta = 0.5;
+    theta = 0.05;
     sigma = 0.05;    
     lambda1 = .08;
     rho0 = .5;
