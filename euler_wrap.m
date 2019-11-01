@@ -15,8 +15,9 @@ function X_res = euler_wrap(X, Y, Adj, M, iter_num, p, h0, alpha, theta, sigma, 
         end
     end
     E_last = calculateEnergyTotal(Y, Adj, X, K_mat, theta, lambda, p, M,alpha);
+    curr_h = h;
     for i = 1:iter_num
-        if h < 0.00001
+        if h < min(0.00001,curr_h/10000)
             plotting1 = X+grad1/30;
             plotting2 = X+grad2/30;
             plotting_sum = X+(grad1+grad2)/30;
@@ -38,7 +39,9 @@ function X_res = euler_wrap(X, Y, Adj, M, iter_num, p, h0, alpha, theta, sigma, 
         fprintf("Accepted new configuration of X \n");
         X = X_new;
         E_last = E;
-        h = h0;
+        curr_h = curr_h/2;
+        h = curr_h;
+        curr_h
         if mod(i, ceil(iter_num/20)) == 0%We allow at most 20 traces per point to appear on the plot, making it less messy
             X_record = [X_record', X']';
         end
