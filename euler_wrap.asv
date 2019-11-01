@@ -16,21 +16,26 @@ function X_res = euler_wrap(X, Y, Adj, M, iter_num, p, h0, alpha, theta, sigma, 
     end
     E_last = calculateEnergyTotal(Y, Adj, X, K_mat, theta, lambda, p, M,alpha);
     for i = 1:iter_num
-        if h < h0*0.00001
-            for j = 1:20
-                X = X + (rand(size(X))-0.5)*0.00001;
-                fprintf("Testing with different directions:\n");
-                [E,grad,X_new] = euler_iter(X, M, Y, Adj, h, p, theta, alpha,sigma,lambda); 
+        if h < 0.00001
+            plotting1 = X+grad1/30;
+            plotting2 = X+grad2/30;
+            plotting_sum = X+(grad1+grad2)/30;
+            plot_particles(X, color_mat);
+            for i = 1:l
+                plot([X(i,1) plotting1(i,1)],[X(i,2) plotting1(i,2)], 'LineWidth', 1, 'color', 'b');
+                plot([X(i,1) plotting2(i,1)],[X(i,2) plotting2(i,2)], 'LineWidth', 1, 'color', 'g');
+                plot([X(i,1) plotting_sum(i,1)],[X(i,2) plotting_sum(i,2)], 'LineWidth', 1, 'color', 'k');
             end
+            drawnow;
             break;
         end
-        [E,grad,X_new] = euler_iter(X, M, Y, Adj, h, p, theta, alpha,sigma,lambda);
+        [E,grad1, grad2,X_new] = euler_iter(X, M, Y, Adj, h, p, theta, alpha,sigma,lambda);
         if E > E_last
             h = h * 1/2;
             continue;
         end
         %fprintf(['E =%.6f   E_last = %.6f\n'],E, E_last);
-        fprintf("Accepted new configuration of X \n")
+        fprintf("Accepted new configuration of X \n");
         X = X_new;
         E_last = E;
         h = h0;
@@ -66,7 +71,7 @@ function plot_network (Y, Adj)
     end
 end
 
-function plot_particles(X, X_record, color_mat)
+function plot_particles(X, color_mat)
 %     for i = 1:size(X_record, 1)
 %         plot(X_record(i,1), X_record(i,2), 'marker','.','color', color_mat(mod(i-1,size(X,1))+1,:));
 %     end
@@ -83,16 +88,49 @@ function y = computeKgrad(x, sigma)
 y = -2* x * computeK(x,sigma)/(sigma^2); 
 end
 
-% function y = computeK(x, sigma)
-% y = exp(-norm(x)/(sigma^2))/sigma;
-% if y < 1e-20
-%     y=0;
-% end
-% end
+%  function y = computeK(x, sigma)
+%  y = exp(-norm(x)/(sigma))/sigma;
+%  end
+%
+%  function y = computeKgrad(x, sigma)
+%  if  norm(x) < 1e-10
+%      y=[0,0];
+%  else
+%    y = -(x /norm(x))*computeK(x, sigma)/(sigma);
+%  end;
+%  end
 % 
-% function y = computeKgrad(x, sigma)
-% y = -(x /norm(x))*computeK(x, sigma)/(sigma^2); 
-% end
+%   function y = computeK(x, sigma)
+%   if  (norm(x) > sigma) | (norm(x) < 1e-8)
+%     y = 0;
+%   else
+%     y=-1/(sigma^2)*log(norm(x)/sigma);
+%   end
+%   end
+% 
+%   function y = computeKgrad(x, sigma)
+%   if  (norm(x) > sigma) | (norm(x) < 1e-8)
+%       y=[0,0];
+%   else
+%     y = -(x /(x*x'))/(sigma^2);
+%   end
+%   end
+
+%    function y = computeK(x, sigma)
+%  if  norm(x) < 1e-10
+%  y = 0;
+%  else
+%  y=1/(x*x');
+%  end;
+%  end
+%
+%  function y = computeKgrad(x, sigma)
+%  if  norm(x) < 1e-7
+%      y=[0,0];
+%  else
+%    y = -x /((x*x')^2);
+%  end;
+%  end
 
 %Computing the convolving term for a given index k
 function U=nextstep_E2(X, l, k, M, p, K_mat,sigma)
@@ -190,7 +228,7 @@ end
 
 
 %One iteration of forward Euler Scheme
-function [E,grad,X_new] = euler_iter(X, M, Y, Adj, h, p, theta, alpha,sigma, lambda)
+function [E,grad_E1,grad_E2,X_new] = euler_iter(X, M, Y, Adj, h, p, theta, alpha,sigma, lambda)
     l = size(X,1);
     X_new = zeros(size(X));
 %     K_mat = arrayfun(@(i) computeK(X(mod(i,l)+1,:)-X(ceil(i/l),:), sigma), 1:l*l);
@@ -235,8 +273,14 @@ function [E,grad,X_new] = euler_iter(X, M, Y, Adj, h, p, theta, alpha,sigma, lam
     end
     [dists, next] = floyd1(D_mat);
     [old_dists, old_next] = floyd1(old_D_mat);
+    grad_E1 = zeros(l, 2);
+    grad_E2 = zeros(l, 2);
     for i = 1:l
-        X_new(i,:) = X(i,:)++h*nextstep_E1(l, ly, XY_union, next, i, M, alpha)+h*theta*nextstep_E2(X, l, i, M, p, K_mat_1,sigma);
+        E1_force = nextstep_E1(l, ly, XY_union, next, i, M, alpha);
+        E2_force = theta*nextstep_E2(X, l, i, M, p, K_mat_1,sigma);
+        grad_E1(i,:) = E1_force;
+        grad_E2(i,:) = E2_force;
+        X_new(i,:) = X(i,:)+h*E1_force+h*E2_force;
     end
     new_K_mat = zeros(l);
     for i = 1:l
@@ -244,7 +288,6 @@ function [E,grad,X_new] = euler_iter(X, M, Y, Adj, h, p, theta, alpha,sigma, lam
             new_K_mat(i,j) = computeK(X_new(i, :) - X_new(j, :), sigma);
         end
     end
-    grad = X_new - X;
     E = calculateEnergyTotal(Y, Adj, X_new, new_K_mat, theta, lambda, p, M,alpha);
     %grad = grad / norm(grad);
     %step_len = sum(vecnorm(X_new-X))/h;

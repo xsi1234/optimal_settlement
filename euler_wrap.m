@@ -7,7 +7,7 @@ function X_res = euler_wrap(X, Y, Adj, M, iter_num, p, h0, alpha, theta, sigma, 
     tic
     h = h0;
     X_record = [];
-    l = size(X,1);
+    l = size(X,1)
     K_mat = zeros();
     for i = 1:l
         for j = 1:l
@@ -81,24 +81,57 @@ function plot_particles(X, color_mat)
     end
 end
 
-function y = computeK(x, sigma)
-y = exp(-x*x'/(sigma^2))/sigma;
-end
-
-function y = computeKgrad(x, sigma)
-y = -2* x * computeK(x,sigma)/(sigma^2); 
-end
-
 % function y = computeK(x, sigma)
-% y = exp(-norm(x)/(sigma^2))/sigma;
-% if y < 1e-20
-%     y=0;
-% end
+% y = exp(-x*x'/(sigma^2))/sigma;
 % end
 % 
 % function y = computeKgrad(x, sigma)
-% y = -(x /norm(x))*computeK(x, sigma)/(sigma^2); 
+% y = -2* x * computeK(x,sigma)/(sigma^2); 
 % end
+
+%  function y = computeK(x, sigma)
+%  y = exp(-norm(x)/(sigma))/sigma;
+%  end
+% 
+%  function y = computeKgrad(x, sigma)
+%  if  norm(x) < 1e-10
+%      y=[0,0];
+%  else
+%    y = -(x /norm(x))*computeK(x, sigma)/(sigma);
+%  end;
+%  end
+% 
+  function y = computeK(x, sigma)
+  if  (norm(x) > sigma) | (norm(x) < 1e-8)
+    y = 0;
+  else
+    y=-1/(sigma^2)*log(norm(x)/sigma);
+  end
+  end
+
+  function y = computeKgrad(x, sigma)
+  if  (norm(x) > sigma) | (norm(x) < 1e-8)
+      y=[0,0];
+  else
+    y = -(x /(x*x'))/(sigma^2);
+  end
+  end
+
+%    function y = computeK(x, sigma)
+%  if  norm(x) < 1e-10
+%  y = 0;
+%  else
+%  y=1/(x*x');
+%  end;
+%  end
+%
+%  function y = computeKgrad(x, sigma)
+%  if  norm(x) < 1e-7
+%      y=[0,0];
+%  else
+%    y = -x /((x*x')^2);
+%  end;
+%  end
 
 %Computing the convolving term for a given index k
 function U=nextstep_E2(X, l, k, M, p, K_mat,sigma)
@@ -256,7 +289,7 @@ function [E,grad_E1,grad_E2,X_new, E_per_particle] = euler_iter(X, M, Y, Adj, h,
             new_K_mat(i,j) = computeK(X_new(i, :) - X_new(j, :), sigma);
         end
     end
-    [E, E_per_particle] = calculateEnergyTotal(Y, Adj, X_new, new_K_mat, theta, lambda, p, M,alpha);
+    E = calculateEnergyTotal(Y, Adj, X_new, new_K_mat, theta, lambda, p, M,alpha);
     %grad = grad / norm(grad);
     %step_len = sum(vecnorm(X_new-X))/h;
     %step_len
