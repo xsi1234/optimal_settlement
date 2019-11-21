@@ -71,10 +71,13 @@ end
 end
 
 
-  function y = computeK(x, sigma)
-  if  (norm(x) > sigma) | (norm(x) < 1e-8)
-    y = 0;
-  else
-    y=-1/(sigma^2)*log(norm(x)/sigma);
-  end
-  end
+%   function y = computeK(x, sigma)
+%   if   (norm(x) < 1e-8)
+%     y = 0;
+%   else
+%     y=-1/(sigma^2)*log(norm(x)/sigma);
+%   end
+%   end
+function y = computeK(x, sigma)
+y = exp(-x*x'/(sigma^2))/sigma;
+end

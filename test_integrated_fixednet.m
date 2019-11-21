@@ -133,20 +133,20 @@ function Optimize_network(outer_iter, inner_iter)
 end
     
 function Optimize_network2(outer_iter, inner_iter)
-    rng(2);
-    n = 3*20;
+    rng(3);
+    n = 5*2;
     m = 30;
-
-    x1(:,1) = -sqrt(2):sqrt(2)/(n/3-1):0;
-    x1(:,2) = zeros(n/3,1);
-    x2(:,1) = 0:sqrt(2)/(n/3-1):sqrt(2);
-    x2(:,2) = x2(:,1);
-    x3(:,1) = x2(:,1);
-    x3(:,2) = -x2(:,1);
-    x = [x1;x2;x3] + .1*randn(n,2);
+%     x1(:,1) = -sqrt(2):sqrt(2)/(n/3-1):0;
+%     x1(:,2) = zeros(n/3,1);
+%     x2(:,1) = 0:sqrt(2)/(n/3-1):sqrt(2);
+%     x2(:,2) = x2(:,1);
+%     x3(:,1) = x2(:,1);
+%     x3(:,2) = -x2(:,1);
+%     x = [x1;x2;x3] + .1*randn(n,2);
+    x = rand(10,2)-ones(10,2)/2;
+    n = size(x, 1);
     total_mass = 1;
     mass = total_mass/n*ones(1,n);
-
     rng(13);
     y0(:,1) = -sqrt(2):sqrt(2)/(m/3-1):0;
     y0(:,2) = zeros(m/3,1);
@@ -155,12 +155,11 @@ function Optimize_network2(outer_iter, inner_iter)
     vert_indices = [1,m/3,2*m/3,m];
     vert_neighs = {2,[m/3-1,m/3+1,2*m/3+1],2*m/3-1,m-1};
     arcs = {1:m/3,m/3:2*m/3,[m/3,2*m/3+1:m]};
-    x=0.35*x;
     y0=0.25*y0;
     net_edges0 = [];
     alpha_2 = 0.2;
-    theta = 0.5;
-    sigma = 0.05;
+    theta = 0.0005;
+    sigma = 0.2;
     lambda1 = .02;
     rho0 = .2;
     tol = 10^4;
@@ -172,7 +171,7 @@ function Optimize_network2(outer_iter, inner_iter)
     delta = 0;
     max_e_leng = .2;
     maximize_subroutine(y0,cut_indices0,net_edges0,vert_indices,vert_neighs,arcs,x,mass,lambda1,alpha,tol,rho0,...
-        max_m,max_avg_turn,normalize_data,pause_bool,delta,max_e_leng,outer_iter,inner_iter, theta, alpha_2, sigma, n);;
+        max_m,max_avg_turn,normalize_data,pause_bool,delta,max_e_leng,outer_iter,inner_iter, theta, alpha_2, sigma, n);
 end
 
 function Optimize_network3(outer_iter, inner_iter)
@@ -805,7 +804,7 @@ function maximize_subroutine(y0,cut_indices0,net_edges0,vert_indices,vert_neighs
     net_edges = net_edges0;
     color_mat = rand(n,3);
     p = 3;
-    h = 0.005;
+    h = 0.00005;
     for j = 1:outer_iter
         fprintf('\n outer iter = %d', j);
         tic

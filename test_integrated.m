@@ -563,7 +563,7 @@ function Optimize_network9(outer_iter, inner_iter)
     arcs = [];
     alpha_2 = 0.2;
     theta = 0.05;
-    sigma = 0.05;    
+    sigma = 0.5;    
     lambda1 = .08;
     rho0 = .5;
     tol = 0.5*10^-4;
