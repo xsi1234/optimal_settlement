@@ -5,47 +5,32 @@ function X_res = euler_wrap(X, Y, Adj, M, iter_num, p, h0, alpha, theta, sigma, 
  %   hold on;
  %   plot_network(Y, Adj);
     tic
+    l = size(X, 1);
     h = h0;
-    X_record = [];
-    l = size(X,1)
-    K_mat = zeros();
-    for i = 1:l
-        for j = 1:l
-            K_mat(i,j) = computeK(X(i, :) - X(j, :), sigma);
-        end
-    end
-    E_last = calculateEnergyTotal(Y, Adj, X, K_mat, theta, lambda, p, M,alpha);
     curr_h = h;
-    total_h = 0;
+    X_record = [];
+    E_last = inf;
+    total_h = 0
     for i = 1:iter_num
-        if h < min(0.00001,curr_h/10000)
-            break;
+        if h < h0*0.001
+            break
         end
-        [E,grad1, grad2,X_new] = euler_iter(X, M, Y, Adj, h, p, theta, alpha,sigma,lambda);
+        [E,grad1, grad2 ,X_new] = euler_iter(X, M, Y, Adj, h, p, theta, alpha,sigma,lambda);
         if E > E_last
-            h = h * 1/2;
+            h = h * 3/4;
             continue;
         end
-        %fprintf(['E =%.6f   E_last = %.6f\n'],E, E_last);
-        fprintf("Accepted new configuration of X \n");
         X = X_new;
-        E_last = E;       
         total_h = total_h + h;
-%         plotting1 = X+grad1/30;
-%         plotting2 = X+grad2/30;
-%         plotting_sum = X+(grad1+grad2)/30;
-%         plot_particles(X, color_mat);
-%         for i = 1:l
-%             plot([X(i,1) plotting1(i,1)],[X(i,2) plotting1(i,2)], 'LineWidth', 1, 'color', 'b');
-%             plot([X(i,1) plotting2(i,1)],[X(i,2) plotting2(i,2)], 'LineWidth', 1, 'color', 'g');
-%             plot([X(i,1) plotting_sum(i,1)],[X(i,2) plotting_sum(i,2)], 'LineWidth', 1, 'color', 'k');
-%         end
-%         drawnow;
+        fprintf("Accepted new configuration of X, %.6f to %.6f \n", E_last, E);
+        E_last = E;
         h = curr_h;
+        %X = X + h*(rand(size(X))-0.5)*0.1;
         if mod(i, ceil(iter_num/20)) == 0%We allow at most 20 traces per point to appear on the plot, making it less messy
             X_record = [X_record', X']';
         end
     end
+    toc
     total_h
     plotting1 = X+grad1/30;
     plotting2 = X+grad2/30;
@@ -57,7 +42,6 @@ function X_res = euler_wrap(X, Y, Adj, M, iter_num, p, h0, alpha, theta, sigma, 
         plot([X(i,1) plotting_sum(i,1)],[X(i,2) plotting_sum(i,2)], 'LineWidth', 1, 'color', 'k');
     end
     drawnow;
-    toc
     X_res = X;
 %    plot_particles(X, X_record, color_mat);
 %    plot_grad(X, grad, color_mat);
@@ -93,7 +77,6 @@ function plot_particles(X, color_mat)
         plot(X(i,1), X(i,2),'marker','o','markersize',5, 'color',color_mat(i,:));
     end
 end
-
 function y = computeK(x, sigma)
 y = exp(-x*x'/(sigma^2))/sigma;
 end
@@ -102,49 +85,16 @@ function y = computeKgrad(x, sigma)
 y = -2* x * computeK(x,sigma)/(sigma^2); 
 end
 
-%  function y = computeK(x, sigma)
-%  y = exp(-norm(x)/(sigma))/sigma;
-%  end
+% function y = computeK(x, sigma)
+% y = exp(-norm(x)/(sigma^2))/sigma;
+% if y < 1e-20
+%     y=0;
+% end
+% end
 % 
-%  function y = computeKgrad(x, sigma)
-%  if  norm(x) < 1e-10
-%      y=[0,0];
-%  else
-%    y = -(x /norm(x))*computeK(x, sigma)/(sigma);
-%  end;
-%  end
-% 
-%   function y = computeK(x, sigma)
-%   if  (norm(x) < 1e-8)
-%     y = 0;
-%   else
-%     y= 1/(sigma^2)*log(norm(x)/sigma);
-%   end
-%   end
-% 
-%   function y = computeKgrad(x, sigma)
-%   if  (norm(x) < 1e-8)
-%       y=[0,0];
-%   else
-%     y = (x /(x*x'))/(sigma^2);
-%   end
-%   end
-
-%    function y = computeK(x, sigma)
-%  if  norm(x) < 1e-10
-%  y = 0;
-%  else
-%  y=1/(x*x');
-%  end;
-%  end
-%
-%  function y = computeKgrad(x, sigma)
-%  if  norm(x) < 1e-7
-%      y=[0,0];
-%  else
-%    y = -x /((x*x')^2);
-%  end;
-%  end
+% function y = computeKgrad(x, sigma)
+% y = -(x /norm(x))*computeK(x, sigma)/(sigma^2); 
+% end
 
 %Computing the convolving term for a given index k
 function U=nextstep_E2(X, l, k, M, p, K_mat,sigma)
