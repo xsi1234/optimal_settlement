@@ -1,6 +1,6 @@
 %Wrapping function for forward Euler Scheme. h = step size, p = kernel
 %dimension. Returns the positions of particles after iter_num iterations.
-function X_res = euler_wrap(X, Y, Adj, M, iter_num, p, h0, alpha, theta, sigma, lambda, color_mat, net_edges)
+function [X_res, E3, E, total_h] = euler_wrap(X, Y, Adj, M, iter_num, p, h0, alpha, theta, sigma, lambda, color_mat, net_edges, prev_E)
  %   figure();
  %   hold on;
  %   plot_network(Y, Adj);
@@ -9,20 +9,24 @@ function X_res = euler_wrap(X, Y, Adj, M, iter_num, p, h0, alpha, theta, sigma, 
     h = h0;
     curr_h = h;
     X_record = [];
-    E_last = inf;
-    total_h = 0
+    E_last = prev_E;
+    %[E_last,grad1, grad2 ,~] = euler_iter(X, M, Y, Adj, 0, p, theta, alpha, sigma, lambda);
+    total_h = 0;
     for i = 1:iter_num
-        if h < h0*0.001
+        if h < h0*0.0001
             break
         end
-        [E,grad1, grad2 ,X_new] = euler_iter(X, M, Y, Adj, h, p, theta, alpha,sigma,lambda);
-        if E > E_last
-            h = h * 3/4;
+        [E,grad1, grad2 ,X_new, E3] = euler_iter(X, M, Y, Adj, h, p, theta, alpha,sigma,lambda);
+        if E > E_last+0.0001
+            h = h * 1/2;
             continue;
         end
         X = X_new;
+        if h < curr_h * 0.00001
+            curr_h = curr_h/2
+        end
         total_h = total_h + h;
-        fprintf("Accepted new configuration of X, %.6f to %.6f \n", E_last, E);
+        fprintf("Accepted new configuration of X, %.6f to %.6f with step size %.6f\n", E_last, E, h);
         E_last = E;
         h = curr_h;
         %X = X + h*(rand(size(X))-0.5)*0.1;
@@ -31,7 +35,8 @@ function X_res = euler_wrap(X, Y, Adj, M, iter_num, p, h0, alpha, theta, sigma, 
         end
     end
     toc
-    total_h
+    E = E_last;
+    fprintf("Total time in this iteration %.6f\n", total_h);
     plotting1 = X+grad1/30;
     plotting2 = X+grad2/30;
     plotting_sum = X+(grad1+grad2)/30;
@@ -77,24 +82,58 @@ function plot_particles(X, color_mat)
         plot(X(i,1), X(i,2),'marker','o','markersize',5, 'color',color_mat(i,:));
     end
 end
+
 function y = computeK(x, sigma)
-y = exp(-x*x'/(sigma^2))/sigma;
+y = exp(-x*x'/(sigma^2))/sigma^2;
 end
 
 function y = computeKgrad(x, sigma)
 y = -2* x * computeK(x,sigma)/(sigma^2); 
 end
 
-% function y = computeK(x, sigma)
-% y = exp(-norm(x)/(sigma^2))/sigma;
-% if y < 1e-20
-%     y=0;
-% end
-% end
+%  function y = computeK(x, sigma)
+%  y = exp(-norm(x)/(sigma))/sigma;
+%  end
 % 
-% function y = computeKgrad(x, sigma)
-% y = -(x /norm(x))*computeK(x, sigma)/(sigma^2); 
-% end
+%  function y = computeKgrad(x, sigma)
+%  if  norm(x) < 1e-10
+%      y=[0,0];
+%  else
+%    y = -(x /norm(x))*computeK(x, sigma)/(sigma);
+%  end;
+%  end
+% 
+%   function y = computeK(x, sigma)
+%   if  (norm(x) < 1e-8)
+%     y = 0;
+%   else
+%     y= 1/(sigma^2)*log(norm(x)/sigma);
+%   end
+%   end
+% 
+%   function y = computeKgrad(x, sigma)
+%   if  (norm(x) < 1e-8)
+%       y=[0,0];
+%   else
+%     y = (x /(x*x'))/(sigma^2);
+%   end
+%   end
+
+%    function y = computeK(x, sigma)
+%  if  norm(x) < 1e-10
+%  y = 0;
+%  else
+%  y=1/(x*x');
+%  end;
+%  end
+%
+%  function y = computeKgrad(x, sigma)
+%  if  norm(x) < 1e-7
+%      y=[0,0];
+%  else
+%    y = -x /((x*x')^2);
+%  end;
+%  end
 
 %Computing the convolving term for a given index k
 function U=nextstep_E2(X, l, k, M, p, K_mat,sigma)
@@ -192,7 +231,7 @@ end
 
 
 %One iteration of forward Euler Scheme
-function [E,grad_E1,grad_E2,X_new] = euler_iter(X, M, Y, Adj, h, p, theta, alpha,sigma, lambda)
+function [E,grad_E1,grad_E2,X_new, E3] = euler_iter(X, M, Y, Adj, h, p, theta, alpha,sigma, lambda)
     l = size(X,1);
     X_new = zeros(size(X));
 %     K_mat = arrayfun(@(i) computeK(X(mod(i,l)+1,:)-X(ceil(i/l),:), sigma), 1:l*l);
@@ -252,7 +291,7 @@ function [E,grad_E1,grad_E2,X_new] = euler_iter(X, M, Y, Adj, h, p, theta, alpha
             new_K_mat(i,j) = computeK(X_new(i, :) - X_new(j, :), sigma);
         end
     end
-    E = calculateEnergyTotal(Y, Adj, X_new, new_K_mat, theta, lambda, p, M,alpha);
+    [E, E3] = calculateEnergyTotal(Y, Adj, X_new, new_K_mat, theta, lambda, p, M,alpha, h);
     %grad = grad / norm(grad);
     %step_len = sum(vecnorm(X_new-X))/h;
     %step_len

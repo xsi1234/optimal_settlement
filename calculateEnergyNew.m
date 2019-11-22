@@ -1,4 +1,4 @@
-function E = calculateEnergyNew(Y,X, net_edges,M, alpha, theta, lambda)
+function E = calculateEnergyNew(Y,X, net_edges,M, alpha, theta, lambda, E3)
     Adj = zeros(size(Y,1));
     for i = 1:size(net_edges, 1)
         Adj(net_edges(i,1), net_edges(i,2)) = 1;
@@ -47,9 +47,11 @@ function E = calculateEnergyNew(Y,X, net_edges,M, alpha, theta, lambda)
             end
         end
     end
-    E3 = 2*((M * K_mat) .^ (3-1))*M';
-    E = lambda*E2 + E1+ theta*E3;
-    fprintf(['E =%.6f   E1 = %.4f   E2 = %.4f   E3 = %.4f\n'],E, lambda*E2, E1, theta*E3);
+    if E3 == 0
+        E3 = theta*2*((M * K_mat) .^ (3-1))*M';
+    end
+    E = lambda*E2 + E1+ E3;
+    fprintf(['E =%.6f   E1 = %.4f   E2 = %.4f   E3 = %.4f\n'],E, lambda*E2, E1, E3);
 end    
     
     
@@ -71,5 +73,5 @@ end
 end
 
 function y = computeK(x, sigma)
-y = exp(-x*x'/(sigma^2))/sigma;
+y = exp(-x*x'/(sigma^2))/sigma^2;
 end

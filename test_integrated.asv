@@ -859,7 +859,7 @@ function maximize_subroutine(y0,cut_indices0,net_edges0,vert_indices,vert_neighs
     E3 = 0;
     prev_E = inf;
     total_h_outer = 0;
-    total_h_record = zeros(outer_iter, 1);
+    total_h_record = zeros(outer_iter);
     for j = 1:outer_iter
         fprintf('\n outer iter = %d\n', j);
         tic
@@ -903,11 +903,9 @@ function maximize_subroutine(y0,cut_indices0,net_edges0,vert_indices,vert_neighs
         [x,E3, E, total_h] = euler_wrap(x, y, Adj, mass, inner_iter, p, h, alpha, theta, sigma, lambda1, color_mat,net_edges, prev_E);
         prev_E = E;
         total_h_outer = total_h_outer + total_h;
-        total_h_record(j,1) = total_h_outer;
-        if j>5 && total_h_outer - total_h_record(j-5) < 0.00001
-            x = x + h*(rand(size(X))-0.5)*0.001;
-            fprintf("Jitter X because of getting stuck\n");
-        end
+        total_h_record(i) = total_h_outer
+        if i>5 && total_h_outer - total_h_record(i-5) < 0.00001
+            x = x + h*(rand(size(X))-0.5)*0.1;
         fprintf("One outer iteration finished, total time: %.6f, current energy: %.6f\n",total_h_outer, prev_E)
     end
     fprintf("Total time: %.6f\n", total_h_outer);

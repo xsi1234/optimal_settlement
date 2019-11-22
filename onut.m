@@ -1,5 +1,5 @@
 function [y,net_edges,edges,edge_weights,iter,energy,dists,next] = onut(y0,net_edges0,x,mass,lambda,alpha,alpha_2,theta,...
-    tol,rho0,max_m,max_avg_turn,normalize_data,plot_bool,delta,max_leng)
+    tol,rho0,max_m,max_avg_turn,normalize_data,plot_bool,delta,max_leng, E3)
 %ONUT computes optimal network for universal transport
 %   This function computes approximate local minimizers to the universal
 %   transportation functional.
@@ -82,7 +82,7 @@ iter = 0; check_top = 0; e_heur = 0; more_prec = 0; n_add = 1;
 [edges,edge_costs,edge_weights,net_edges,y_net_edge_inds,neighbors,y,z,b,next,top_change,dists] = computeEdgeWeights(y,x,alpha,lambda,net_edges0,mass,check_top,e_heur,delta);
 energy = calculateEnergy(y,x,edges,edge_costs);
 %energy01 = calculateEnergyOld(y,x, net_edges, mass, alpha_2, theta, lambda);
-energy_1 = calculateEnergyNew(y,x, net_edges, mass, alpha_2, theta, lambda);
+energy_1 = calculateEnergyNew(y,x, net_edges, mass, alpha_2, theta, lambda, E3);
 %fprintf('Old energy: %f, %f\n', energy, energy01);
 %fig2 = figure;
 %plotGraph(x,y,edges,edge_weights,lambda,alpha,20,mass,rgb_c,ls);
@@ -163,7 +163,7 @@ while energy_prev-energy>tol*energy || energy0-energy>tol*energy || energy0<ener
     [edges,edge_costs,edge_weights,net_edges,y_net_edge_inds,neighbors,y,z,b,next,top_change,dists] = computeEdgeWeights(y,x,alpha,lambda,net_edges,mass,check_top,e_heur,delta);
     energy = calculateEnergy(y,x,edges,edge_costs);
     %energy01 = calculateEnergyOld(y,x, net_edges, mass, alpha_2, theta, lambda);
-    energy_1 = calculateEnergyNew(y,x, net_edges, mass, alpha_2, theta, lambda);%In each place of calculating E, we add a calculation of E in the new version
+    energy_1 = calculateEnergyNew(y,x, net_edges, mass, alpha_2, theta, lambda, E3);%In each place of calculating E, we add a calculation of E in the new version
     %fprintf('1 Old energy: %f, %f\n', energy, energy01);
     if energy0-energy < 10*tol*energy
         more_prec = 1;

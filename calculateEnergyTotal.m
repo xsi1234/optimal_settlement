@@ -1,4 +1,4 @@
-function E = calculateEnergyTotal(Y, Adj, X, K_mat, theta, lambda, p, M,alpha)
+function [E,E3] = calculateEnergyTotal(Y, Adj, X, K_mat, theta, lambda, p, M,alpha, h)
     total_mass = sum(M);
     n = size(K_mat,1);
     l = size(X,1);
@@ -43,7 +43,8 @@ function E = calculateEnergyTotal(Y, Adj, X, K_mat, theta, lambda, p, M,alpha)
     E2_old = sum(sum(old_dist_mat .* repmat(M, n, 1) .* repmat(M', 1, n)));
     E3 = ((M * K_mat) .^ (p-1))*M';
     E = lambda * E1 + E2 + theta * E3;
-    fprintf(['E =%.6f   E1 = %.6f   E2 = %.6f   E3 = %.6f   old_E2 = %.6f   old_E = %.6f\n'],E, lambda*E1 , E2, theta*E3, E2_old, lambda * E1 + E2_old + theta * E3);
+    E3 = theta*E3;
+    fprintf(['E =%.6f   E1 = %.6f   E2 = %.6f   E3 = %.6f   old_E2 = %.6f   old_E = %.6f   h = %.6f\n'],E, lambda*E1 , E2, E3, E2_old, lambda * E1 + E2_old + theta * E3, h);
 end
 
 function [dists,next] = floyd(weight_mat)
