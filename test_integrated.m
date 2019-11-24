@@ -855,11 +855,12 @@ function maximize_subroutine(y0,cut_indices0,net_edges0,vert_indices,vert_neighs
     net_edges = net_edges0;
     color_mat = rand(n,3);
     p = 3;
-    h = 0.05;
+    h0 = 0.05;
     E3 = 0;
     prev_E = inf;
     total_h_outer = 0;
     total_h_record = zeros(outer_iter, 1);
+    h = h0;
     for j = 1:outer_iter
         fprintf('\n outer iter = %d\n', j);
         tic
@@ -900,7 +901,8 @@ function maximize_subroutine(y0,cut_indices0,net_edges0,vert_indices,vert_neighs
         plot_particles(x, color_mat);
         axis equal;
         drawnow;
-        [x,E3, E, total_h] = euler_wrap(x, y, Adj, mass, inner_iter, p, h, alpha, theta, sigma, lambda1, color_mat,net_edges, prev_E);
+        [x,E3, E, total_h, final_h] = euler_wrap(x, y, Adj, mass, inner_iter, p, h, alpha, theta, sigma, lambda1, color_mat,net_edges, prev_E);
+        h = min(h0, final_h * 2)
         prev_E = E;
         total_h_outer = total_h_outer + total_h;
         total_h_record(j,1) = total_h_outer;

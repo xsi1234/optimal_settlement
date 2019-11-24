@@ -1,6 +1,6 @@
 %Wrapping function for forward Euler Scheme. h = step size, p = kernel
 %dimension. Returns the positions of particles after iter_num iterations.
-function [X_res, E3, E, total_h] = euler_wrap(X, Y, Adj, M, iter_num, p, h0, alpha, theta, sigma, lambda, color_mat, net_edges, prev_E)
+function [X_res, E3, E, total_h, final_h] = euler_wrap(X, Y, Adj, M, iter_num, p, h0, alpha, theta, sigma, lambda, color_mat, net_edges, prev_E)
  %   figure();
  %   hold on;
  %   plot_network(Y, Adj);
@@ -13,21 +13,25 @@ function [X_res, E3, E, total_h] = euler_wrap(X, Y, Adj, M, iter_num, p, h0, alp
     %[E_last,grad1, grad2 ,~] = euler_iter(X, M, Y, Adj, 0, p, theta, alpha, sigma, lambda);
     total_h = 0;
     for i = 1:iter_num
-        if h < 0.0001
+        if h < curr_h * 0.001
+            final_h = h * 4;
             break
         end
         [E,grad1, grad2 ,X_new, E3] = euler_iter(X, M, Y, Adj, h, p, theta, alpha,sigma,lambda);
-        if E > E_last+0.0001
+        [E,grad1, grad2 ,X_new, E3] = euler_iter(X_new, M, Y, Adj, 3*h/4, p, theta, alpha,sigma,lambda);
+        fprintf("----------------------------------------------------------\n")
+        if E > E_last
             h = h * 1/2;
             continue;
         end
+        fprintf("Accepted new configuration of X, %.6f to %.6f with step size %.6f\n", E_last, E, h);
         X = X_new;
         if h < curr_h * 0.00001
             curr_h = curr_h/2
         end
         total_h = total_h + h;
-        fprintf("Accepted new configuration of X, %.6f to %.6f with step size %.6f\n", E_last, E, h);
         E_last = E;
+        final_h = h;
         h = curr_h;
         %X = X + h*(rand(size(X))-0.5)*0.1;
         if mod(i, ceil(iter_num/20)) == 0%We allow at most 20 traces per point to appear on the plot, making it less messy
