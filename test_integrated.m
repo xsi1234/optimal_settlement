@@ -905,7 +905,7 @@ function maximize_subroutine(y0,cut_indices0,net_edges0,vert_indices,vert_neighs
         total_h_outer = total_h_outer + total_h;
         total_h_record(j,1) = total_h_outer;
         if j>5 && total_h_outer - total_h_record(j-5) < 0.00001
-            x = x + h*(rand(size(X))-0.5)*0.001;
+            x = x + h*(rand(size(x))-0.5)*0.001;
             fprintf("Jitter X because of getting stuck\n");
         end
         fprintf("One outer iteration finished, total time: %.6f, current energy: %.6f\n",total_h_outer, prev_E)

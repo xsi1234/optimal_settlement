@@ -13,7 +13,7 @@ function [X_res, E3, E, total_h] = euler_wrap(X, Y, Adj, M, iter_num, p, h0, alp
     %[E_last,grad1, grad2 ,~] = euler_iter(X, M, Y, Adj, 0, p, theta, alpha, sigma, lambda);
     total_h = 0;
     for i = 1:iter_num
-        if h < h0*0.0001
+        if h < 0.0001
             break
         end
         [E,grad1, grad2 ,X_new, E3] = euler_iter(X, M, Y, Adj, h, p, theta, alpha,sigma,lambda);
