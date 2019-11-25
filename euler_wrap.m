@@ -17,6 +17,7 @@ function [X_res, E3, E, total_h, final_h] = euler_wrap(X, Y, Adj, M, iter_num, p
             final_h = h * 4;
             break
         end
+        Y
         [E,grad1, grad2 ,X_new, E3] = euler_iter(X, M, Y, Adj, h, p, theta, alpha,sigma,lambda);
         [E,grad1, grad2 ,X_new, E3] = euler_iter(X_new, M, Y, Adj, 3*h/4, p, theta, alpha,sigma,lambda);
         fprintf("----------------------------------------------------------\n")
