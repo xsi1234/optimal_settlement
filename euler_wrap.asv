@@ -14,11 +14,11 @@ function [X_res, E3, E, total_h, final_h] = euler_wrap(X, Y, Adj, M, iter_num, p
     total_h = 0;
     for i = 1:iter_num
         if h < curr_h * 0.001
-            final_h = h * 
+            final_h = h * 4;
             break
         end
         [E,grad1, grad2 ,X_new, E3] = euler_iter(X, M, Y, Adj, h, p, theta, alpha,sigma,lambda);
-        [E,grad1, grad2 ,X_new, E3] = euler_iter(X_new, M, Y, Adj, h/2, p, theta, alpha,sigma,lambda);
+        [E,grad1, grad2 ,X_new, E3] = euler_iter(X_new, M, Y, Adj, 3*h/4, p, theta, alpha,sigma,lambda);
         fprintf("----------------------------------------------------------\n")
         if E > E_last
             h = h * 1/2;
@@ -197,6 +197,7 @@ function V = nextstep_E1(lx, ly, XY_union, next, k, M, alpha)
             flag = 0;
             zi = XY_union(next_i, :);%access z1
             next_2 = next(next_i, ly+i);%index of z2
+            fprintf("%d
             if next_2 > 0 && next_2 <= ly && next_i <=ly
                 z2 = XY_union(next_2, :);%access z2
                 v1 = xk - zi;
@@ -213,7 +214,10 @@ function V = nextstep_E1(lx, ly, XY_union, next, k, M, alpha)
                 end
             end
             if flag == 0
+                fprintf("0");
                 D_grad_kth(i, :) = (xk-zi)/norm(xk-zi);
+            else
+                fprintf("1");
             end
         end
     end

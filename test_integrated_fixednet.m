@@ -138,8 +138,8 @@ function Optimize_network(outer_iter, inner_iter)
 end
     
 function Optimize_network21(outer_iter, inner_iter)%
-    rng(4);
-    n = 3*5;
+    rng(7);
+    n = 3*3;
     m = 60;
 
     x1(:,1) = -sqrt(2):sqrt(2)/(n/3-1):0;

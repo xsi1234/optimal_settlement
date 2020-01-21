@@ -17,7 +17,6 @@ function [X_res, E3, E, total_h, final_h] = euler_wrap(X, Y, Adj, M, iter_num, p
             final_h = h * 4;
             break
         end
-        Y
         [E,grad1, grad2 ,X_new, E3] = euler_iter(X, M, Y, Adj, h, p, theta, alpha,sigma,lambda);
         [E,grad1, grad2 ,X_new, E3] = euler_iter(X_new, M, Y, Adj, 3*h/4, p, theta, alpha,sigma,lambda);
         fprintf("----------------------------------------------------------\n")
@@ -198,14 +197,20 @@ function V = nextstep_E1(lx, ly, XY_union, next, k, M, alpha)
             flag = 0;
             zi = XY_union(next_i, :);%access z1
             next_2 = next(next_i, ly+i);%index of z2
+            %fprintf("%d %d %d\n", next_2>0, next_2<ly, next_i<ly);
             if next_2 > 0 && next_2 <= ly && next_i <=ly
                 z2 = XY_union(next_2, :);%access z2
                 v1 = xk - zi;
                 v2 = zi - z2;
-                beta = acos(dot(-v1,v2)/(norm(v1)*norm(v2)));%compute angle between v1 and v2¡¢
+                beta = acos(dot(-v1,v2)/(norm(v1)*norm(v2)));%compute angle between v1 and v2
+                betad = acosd(dot(-v1,v2)/(norm(v1)*norm(v2)));
                 gamma = acos(dot(xk-z2, v2)/norm(xk-z2)*norm(v2));
-                theta = acos(alpha);
-                if beta < theta && gamma < pi-theta
+                gammad = acosd(dot(xk-z2, v2)/norm(xk-z2)*norm(v2));
+                theta = pi - acos(alpha);
+                thetad = 180 - acosd(alpha);
+                %fprintf("%.6f, %.6f, %.6f\n", betad, gammad, thetad);
+                %fprintf("asdfg%d %d\n", beta < theta, gamma < theta);
+                if beta < theta && gamma < theta
                     v = -(z2-zi)/norm(z2-zi);%normalized vector from z2 to zi
                     xp = dot(xk-zi,v)*v+zi; %projection of xk onto the vector;
                     wi = xp + v * norm(xk - xp) * cot(theta);%compute the "should be there? station
